@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  health_service:
+    build:
+      context: ../
+      dockerfile: ./build/Dockerfile
+    image: health_service_docker_image
+    volumes:
+      - ../configs/config.toml:/etc/health/config.toml:ro
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
