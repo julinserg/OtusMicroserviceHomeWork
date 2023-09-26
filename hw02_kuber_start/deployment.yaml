@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-status-app-deployment
+spec:
+  selector:
+    matchLabels:
+      app: status-app
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: status-app
+    spec:
+      containers:
+      - name: status-app
+        image: julinserg/health_service_docker_image:latest
+        ports:
+        - containerPort: 8000
+
