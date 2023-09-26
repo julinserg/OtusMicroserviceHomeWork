@@ -21,7 +21,7 @@ RUN CGO_ENABLED=0 go build \
         -o ${BIN_FILE} cmd/health/*
 
 # На выходе тонкий образ
-FROM alpine:3.9
+FROM golang:1.17.2
 
 LABEL ORGANIZATION="OTUS Online Education"
 LABEL SERVICE="health"
