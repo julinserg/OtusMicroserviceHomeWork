@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"    
+    nginx.ingress.kubernetes.io/rewrite-target: /$1$2
+  name: my-status-app-ingress-rewrite
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: arch.homework
+    http:
+      paths:
+      - path: /otusapp/julinserg/(.*)(/|$)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: my-status-app-service
+            port:
+              number: 8000
