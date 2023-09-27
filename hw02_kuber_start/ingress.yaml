@@ -8,7 +8,7 @@ spec:
   - host: arch.homework
     http:
       paths:
-      - path: /
+      - path: /health
         pathType: Prefix
         backend:
           service:

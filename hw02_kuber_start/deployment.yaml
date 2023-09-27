@@ -17,4 +17,10 @@ spec:
         image: julinserg/health_service_docker_image:latest
         ports:
         - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 3
 
