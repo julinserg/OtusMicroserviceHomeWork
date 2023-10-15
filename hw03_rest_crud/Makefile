@@ -8,7 +8,10 @@ build:
 
 run: build
 	$(BIN_CND) -config ./configs/config.toml
-	
+
+dbuild:
+	docker-compose -f ./deployments/docker-compose.yaml build --no-cache
+
 up:
 	docker-compose -f ./deployments/docker-compose.yaml up
 

@@ -1,0 +1,35 @@
+version: "3"
+networks:
+  db:
+    driver: bridge
+
+services:
+  users_service_crud:
+    build:
+      context: ../
+      dockerfile: ./build/Dockerfile
+    image: users_service_docker_image
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    networks:
+      - db
+
+  postgres:
+    image: postgres:11.1
+    environment:
+      POSTGRES_USER: sergey
+      POSTGRES_PASSWORD: sergey
+      POSTGRES_DB: users
+    networks:
+      - db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d users -U sergey " ]
+      interval: 5s
+      timeout: 5s
+      retries: 5

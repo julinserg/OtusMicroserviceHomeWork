@@ -1,7 +1,7 @@
 # Собираем в гошке
 FROM golang:1.17.2 as build
 
-ENV BIN_FILE /opt/users/users-app
+ENV BIN_FILE /opt/users_service/users_service-app
 ENV CODE_DIR /go/src/
 
 WORKDIR ${CODE_DIR}
@@ -18,21 +18,20 @@ COPY . ${CODE_DIR}
 ARG LDFLAGS
 RUN CGO_ENABLED=0 go build \
         -ldflags "$LDFLAGS" \
-        -o ${BIN_FILE} cmd/users/*
+        -o ${BIN_FILE} cmd/users_service/*
 
 # На выходе тонкий образ
-FROM gomicro/goose
+FROM golang:1.17.2
 
-ADD ./migrations/*.sql /migrations/
 
 LABEL ORGANIZATION="OTUS Online Education"
-LABEL SERVICE="users"
+LABEL SERVICE="users_service"
 LABEL MAINTAINERS="student@otus.ru"
 
-ENV BIN_FILE "/opt/users/users-app"
+ENV BIN_FILE "/opt/users_service/users_service-app"
 COPY --from=build ${BIN_FILE} ${BIN_FILE}
 
-ENV CONFIG_FILE /etc/users/config.toml
+ENV CONFIG_FILE /etc/users_service/config.toml
 COPY ./configs/config-docker.toml ${CONFIG_FILE}
 
 CMD ${BIN_FILE} -config ${CONFIG_FILE}
