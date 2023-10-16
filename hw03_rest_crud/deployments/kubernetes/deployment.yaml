@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-service-deployment
+spec:
+  selector:
+    matchLabels:
+      app: users-service
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: users-service
+    spec:
+      containers:
+      - name: users-service
+        image: julinserg/users_service_docker_image:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: USC_LOG_LEVEL
+          value: "INFO"
+        - name: USC_HTTP_HOST
+          value: "0.0.0.0"
+        - name: USC_HTTP_PORT
+          value: "8080"
+        - name: USC_PG_HOST
+          value: "pg1-postgresql"
+        - name: USC_PG_USER
+          value: "postgres"
+        - name: USC_PG_PASSWORD
+          value: "postgres"
+        - name: USC_PG_DB
+          value: "users"
+

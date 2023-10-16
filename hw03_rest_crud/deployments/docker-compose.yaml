@@ -9,6 +9,14 @@ services:
       context: ../
       dockerfile: ./build/Dockerfile
     image: users_service_docker_image
+    environment:
+      USC_LOG_LEVEL: INFO
+      USC_HTTP_HOST: 0.0.0.0
+      USC_HTTP_PORT: 8080
+      USC_PG_HOST: postgres
+      USC_PG_USER: sergey
+      USC_PG_PASSWORD: sergey
+      USC_PG_DB: users
     depends_on:
       postgres:
         condition: service_healthy

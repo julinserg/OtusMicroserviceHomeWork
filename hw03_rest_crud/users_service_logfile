@@ -113,3 +113,6 @@
 {"level":"info","time":"2023-10-15T23:11:30+03:00","message":"127.0.0.1 [2023-10-15 23:11:30.83442472 +0300 MSK m=+2.788538803] PUT /api/v1/user/1 HTTP/1.1 0 9.193749ms 'PostmanRuntime/7.33.0'"}
 {"level":"info","time":"2023-10-15T23:11:30+03:00","message":"127.0.0.1 [2023-10-15 23:11:30.900480693 +0300 MSK m=+2.854594770] DELETE /api/v1/user/1 HTTP/1.1 204 953.406µs 'PostmanRuntime/7.33.0'"}
 {"level":"info","time":"2023-10-15T23:14:38+03:00","message":"http server stopped"}
+{"level":"info","time":"2023-10-16T16:15:33+03:00","message":"users_service is running..."}
+{"level":"info","time":"2023-10-16T16:15:33+03:00","message":"http server started on 0.0.0.0:8080"}
+{"level":"info","time":"2023-10-16T16:15:36+03:00","message":"http server stopped"}

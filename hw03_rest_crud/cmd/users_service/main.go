@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -38,7 +39,21 @@ func main() {
 	config := NewConfig()
 	err := config.Read(configFile)
 	if err != nil {
-		log.Fatalln("failed to read config: " + err.Error())
+		var value string
+		value, _ = os.LookupEnv("USC_LOG_LEVEL")
+		config.Logger.Level = value
+		value, _ = os.LookupEnv("USC_HTTP_HOST")
+		config.HTTP.Host = value
+		value, _ = os.LookupEnv("USC_HTTP_PORT")
+		config.HTTP.Port = value
+		value, _ = os.LookupEnv("USC_HTTP_PORT")
+		config.HTTP.Port = value
+		dbHost, _ := os.LookupEnv("USC_PG_HOST")
+		dbUser, _ := os.LookupEnv("USC_PG_USER")
+		dbPassword, _ := os.LookupEnv("USC_PG_PASSWORD")
+		dbName, _ := os.LookupEnv("USC_PG_DB")
+		config.PSQL.DSN = fmt.Sprintf("host=%s port=5432 user=%s password=%s dbname=%s sslmode=disable",
+			dbHost, dbUser, dbPassword, dbName)
 	}
 
 	f, err := os.OpenFile("users_service_logfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
@@ -56,11 +71,9 @@ func main() {
 		defer cancel()
 		if err := sqlstor.Connect(ctx, config.PSQL.DSN); err != nil {
 			logg.Error("cannot connect to psql: " + err.Error())
-			return
 		}
 		if err := sqlstor.CreateSchema(); err != nil {
 			logg.Error("cannot create database schema: " + err.Error())
-			return
 		}
 		defer func() {
 			if err := sqlstor.Close(); err != nil {

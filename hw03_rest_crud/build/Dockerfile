@@ -31,7 +31,4 @@ LABEL MAINTAINERS="student@otus.ru"
 ENV BIN_FILE "/opt/users_service/users_service-app"
 COPY --from=build ${BIN_FILE} ${BIN_FILE}
 
-ENV CONFIG_FILE /etc/users_service/config.toml
-COPY ./configs/config-docker.toml ${CONFIG_FILE}
-
-CMD ${BIN_FILE} -config ${CONFIG_FILE}
+CMD ${BIN_FILE}
