@@ -19,17 +19,29 @@ spec:
         - containerPort: 8080
         env:
         - name: USC_LOG_LEVEL
-          value: "INFO"
+          valueFrom:
+            configMapKeyRef:             
+              name: users-service-configmap            
+              key: loglevel
         - name: USC_HTTP_HOST
-          value: "0.0.0.0"
+          valueFrom:
+            configMapKeyRef:             
+              name: users-service-configmap            
+              key: httphost
         - name: USC_HTTP_PORT
-          value: "8080"
+          valueFrom:
+            configMapKeyRef:             
+              name: users-service-configmap            
+              key: httpport
         - name: USC_PG_HOST
           value: "pg1-postgresql"
         - name: USC_PG_USER
           value: "postgres"
         - name: USC_PG_PASSWORD
-          value: "postgres"
+          valueFrom:
+            secretKeyRef:             
+              name: users-service-secret            
+              key: password
         - name: USC_PG_DB
           value: "users"
 
