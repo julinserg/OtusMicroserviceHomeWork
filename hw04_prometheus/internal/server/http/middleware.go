@@ -24,7 +24,7 @@ var responseStatus = prometheus.NewCounterVec(
 		Name: "response_status",
 		Help: "Status of HTTP response",
 	},
-	[]string{"status"},
+	[]string{"status", "path"},
 )
 
 var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
@@ -42,7 +42,13 @@ func loggingMiddleware(next http.Handler, logger Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		startTime := time.Now()
 
-		path := r.Method + ":" + r.URL.Path
+		var path string
+		if strings.Contains(r.URL.Path, "/api/v1/user/") {
+			path = r.Method + ":/api/v1/user/"
+		} else {
+			path = r.URL.Path
+		}
+
 		timer := prometheus.NewTimer(httpDuration.WithLabelValues(path))
 
 		recorder := &StatusRecorder{
@@ -63,7 +69,7 @@ func loggingMiddleware(next http.Handler, logger Logger) http.Handler {
 		sb.WriteString(`'` + r.UserAgent() + `'`)
 		logger.Info(sb.String())
 
-		responseStatus.WithLabelValues(strconv.Itoa(recorder.Status)).Inc()
+		responseStatus.WithLabelValues(strconv.Itoa(recorder.Status), path).Inc()
 		totalRequests.WithLabelValues(path).Inc()
 		timer.ObserveDuration()
 	})
