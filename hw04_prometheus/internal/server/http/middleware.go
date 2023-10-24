@@ -16,7 +16,7 @@ var totalRequests = prometheus.NewCounterVec(
 		Name: "http_requests_total",
 		Help: "Number of get requests.",
 	},
-	[]string{"path"},
+	[]string{"path", "method"},
 )
 
 var responseStatus = prometheus.NewCounterVec(
@@ -24,13 +24,13 @@ var responseStatus = prometheus.NewCounterVec(
 		Name: "response_status",
 		Help: "Status of HTTP response",
 	},
-	[]string{"status", "path"},
+	[]string{"status", "path", "method"},
 )
 
 var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
 	Name: "http_response_time_seconds",
 	Help: "Duration of HTTP requests.",
-}, []string{"path"})
+}, []string{"path", "method"})
 
 func initPrometheus() {
 	prometheus.Register(totalRequests)
@@ -42,14 +42,10 @@ func loggingMiddleware(next http.Handler, logger Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		startTime := time.Now()
 
-		var path string
-		if strings.Contains(r.URL.Path, "/api/v1/user/") {
-			path = r.Method + ":/api/v1/user/"
-		} else {
-			path = r.URL.Path
-		}
+		path := r.URL.Path
+		method := r.Method
 
-		timer := prometheus.NewTimer(httpDuration.WithLabelValues(path))
+		timer := prometheus.NewTimer(httpDuration.WithLabelValues(path, method))
 
 		recorder := &StatusRecorder{
 			ResponseWriter: w,
@@ -69,8 +65,8 @@ func loggingMiddleware(next http.Handler, logger Logger) http.Handler {
 		sb.WriteString(`'` + r.UserAgent() + `'`)
 		logger.Info(sb.String())
 
-		responseStatus.WithLabelValues(strconv.Itoa(recorder.Status), path).Inc()
-		totalRequests.WithLabelValues(path).Inc()
+		responseStatus.WithLabelValues(strconv.Itoa(recorder.Status), path, method).Inc()
+		totalRequests.WithLabelValues(path, method).Inc()
 		timer.ObserveDuration()
 	})
 }
