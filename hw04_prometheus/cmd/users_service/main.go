@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"sync"
@@ -17,7 +16,6 @@ import (
 	"github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw04_prometheus/internal/logger"
 	internalhttp "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw04_prometheus/internal/server/http"
 	sqlstorage "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw04_prometheus/internal/storage/sql"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var configFile string
@@ -106,7 +104,7 @@ func main() {
 	logg.Info("users_service is running...")
 
 	wg := &sync.WaitGroup{}
-	wg.Add(2)
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		if err := serverHttp.Start(ctx); err != nil {
@@ -114,11 +112,6 @@ func main() {
 			cancel()
 			return
 		}
-	}()
-	go func() {
-		defer wg.Done()
-		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(":2112", nil)
 	}()
 	wg.Wait()
 }

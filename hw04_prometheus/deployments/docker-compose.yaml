@@ -23,10 +23,8 @@ services:
     restart: on-failure
     ports:
       - "8080:8080"
-      - "2112:2112"
     expose:
       - 8080
-      - 2112
     networks:
       - db
 

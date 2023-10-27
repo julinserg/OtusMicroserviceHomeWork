@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: users-service
-        image: julinserg/users_service_docker_image:latest
+        image: julinserg/users_service_prometheus_docker_image:latest
         ports:
         - containerPort: 8080
         env:

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw04_prometheus/internal/app"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Storage interface {
@@ -49,6 +50,7 @@ func NewServer(logger Logger, storage Storage, endpoint string) *Server {
 	uh := userHandler{logger, storage}
 	mux.HandleFunc("/api/v1/", hellowHandler)
 	mux.HandleFunc("/api/v1/user/", uh.commonHandler)
+	mux.Handle("/metrics", promhttp.Handler())
 	return &Server{server, logger, endpoint}
 }
 
