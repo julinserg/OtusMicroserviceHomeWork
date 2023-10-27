@@ -2,12 +2,13 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: users-service-monitor
-    
+  labels:
+    app: users-service-monitor  
 spec:
   endpoints:
     - port: metrics
       scrapeTimeout: 30s
-      path: /actuator/prometheus     
+      path: /metrics
       honorLabels: true
       scheme: http      
   selector:

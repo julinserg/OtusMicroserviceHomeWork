@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: users-service-deployment
+  labels:
+    app: users-service
 spec:
   selector:
     matchLabels:
@@ -16,7 +18,7 @@ spec:
       - name: users-service
         image: julinserg/users_service_prometheus_docker_image:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8090
         env:
         - name: USC_LOG_LEVEL
           valueFrom:

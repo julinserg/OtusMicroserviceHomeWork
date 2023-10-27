@@ -12,6 +12,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: users-service-service
+            name: users-service
             port:
-              number: 8080
+              number: 8090
