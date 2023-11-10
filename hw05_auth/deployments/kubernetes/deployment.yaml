@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-service-deployment
+  labels:
+    app: users-service
+spec:
+  selector:
+    matchLabels:
+      app: users-service
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: users-service
+    spec:
+      containers:
+      - name: users-service
+        image: julinserg/users_service_prometheus_docker_image:latest
+        ports:
+        - containerPort: 8090
+        env:
+        - name: USC_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:             
+              name: users-service-configmap            
+              key: loglevel
+        - name: USC_HTTP_HOST
+          valueFrom:
+            configMapKeyRef:             
+              name: users-service-configmap            
+              key: httphost
+        - name: USC_HTTP_PORT
+          valueFrom:
+            configMapKeyRef:             
+              name: users-service-configmap            
+              key: httpport
+        - name: USC_PG_HOST
+          value: "pg1-postgresql"
+        - name: USC_PG_USER
+          value: "postgres"
+        - name: USC_PG_PASSWORD
+          valueFrom:
+            secretKeyRef:             
+              name: users-service-secret            
+              key: password
+        - name: USC_PG_DB
+          value: "users"
+

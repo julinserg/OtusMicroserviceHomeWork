@@ -1,0 +1,67 @@
+{"level":"info","time":"2023-11-09T07:28:39+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T07:28:39+03:00","message":"http server started on 0.0.0.0:9000"}
+{"level":"info","time":"2023-11-09T07:28:47+03:00","message":"http server stopped"}
+{"level":"info","time":"2023-11-09T11:01:01+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:01:01+03:00","message":"http server started on 0.0.0.0:9000"}
+{"level":"error","time":"2023-11-09T11:01:01+03:00","message":"failed to start http server: listen tcp 0.0.0.0:9000: bind: address already in use"}
+{"level":"info","time":"2023-11-09T11:01:12+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:01:12+03:00","message":"http server started on 0.0.0.0:9000"}
+{"level":"error","time":"2023-11-09T11:01:12+03:00","message":"failed to start http server: listen tcp 0.0.0.0:9000: bind: address already in use"}
+{"level":"info","time":"2023-11-09T11:02:05+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:02:05+03:00","message":"http server started on 0.0.0.0:80"}
+{"level":"error","time":"2023-11-09T11:02:05+03:00","message":"failed to start http server: listen tcp 0.0.0.0:80: bind: permission denied"}
+{"level":"info","time":"2023-11-09T11:02:17+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:02:17+03:00","message":"http server started on 0.0.0.0:80"}
+{"level":"error","time":"2023-11-09T11:02:17+03:00","message":"failed to start http server: listen tcp 0.0.0.0:80: bind: address already in use"}
+{"level":"info","time":"2023-11-09T11:02:33+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:02:33+03:00","message":"http server started on 0.0.0.0:8080"}
+{"level":"error","time":"2023-11-09T11:02:33+03:00","message":"failed to start http server: listen tcp 0.0.0.0:8080: bind: address already in use"}
+{"level":"info","time":"2023-11-09T11:03:11+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:03:11+03:00","message":"http server started on 0.0.0.0:8080"}
+{"level":"error","time":"2023-11-09T11:03:11+03:00","message":"failed to start http server: listen tcp 0.0.0.0:8080: bind: address already in use"}
+{"level":"info","time":"2023-11-09T11:08:08+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:08:08+03:00","message":"http server started on 0.0.0.0:8080"}
+{"level":"error","time":"2023-11-09T11:08:08+03:00","message":"failed to start http server: listen tcp 0.0.0.0:8080: bind: address already in use"}
+{"level":"info","time":"2023-11-09T11:08:20+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:08:20+03:00","message":"http server started on 0.0.0.0:8081"}
+{"level":"error","time":"2023-11-09T11:12:12+03:00","message":"User ID not set"}
+{"level":"info","time":"2023-11-09T11:12:12+03:00","message":"127.0.0.1 [2023-11-09 11:12:12.865908159 +0300 MSK m=+231.948139126] POST /register HTTP/1.1 400 783.907µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T11:13:20+03:00","message":"http server stopped"}
+{"level":"info","time":"2023-11-09T11:13:27+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:13:27+03:00","message":"http server started on 0.0.0.0:8081"}
+{"level":"error","time":"2023-11-09T11:13:32+03:00","message":"sql: Scan error on column index 0, name \"id\": destination not a pointer"}
+{"level":"info","time":"2023-11-09T11:13:32+03:00","message":"127.0.0.1 [2023-11-09 11:13:32.707235966 +0300 MSK m=+5.690386092] POST /register HTTP/1.1 400 20.590285ms 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T11:17:00+03:00","message":"http server stopped"}
+{"level":"info","time":"2023-11-09T11:17:05+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:17:05+03:00","message":"http server started on 0.0.0.0:8081"}
+{"level":"info","time":"2023-11-09T11:17:22+03:00","message":"127.0.0.1 [2023-11-09 11:17:22.280436341 +0300 MSK m=+16.627134918] POST /register HTTP/1.1 200 11.626198ms 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T11:17:54+03:00","message":"127.0.0.1 [2023-11-09 11:17:54.072273402 +0300 MSK m=+48.418971971] POST /register HTTP/1.1 200 2.296459ms 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T11:18:15+03:00","message":"127.0.0.1 [2023-11-09 11:18:15.40479568 +0300 MSK m=+69.751494250] POST /register HTTP/1.1 200 6.544202ms 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T11:19:06+03:00","message":"http server stopped"}
+{"level":"info","time":"2023-11-09T11:43:43+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T11:43:43+03:00","message":"http server started on 0.0.0.0:8081"}
+{"level":"info","time":"2023-11-09T11:43:50+03:00","message":"127.0.0.1 [2023-11-09 11:43:50.08556451 +0300 MSK m=+6.913334911] POST /register HTTP/1.1 200 15.590455ms 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T11:43:54+03:00","message":"127.0.0.1 [2023-11-09 11:43:54.237961098 +0300 MSK m=+11.065731517] POST /login HTTP/1.1 200 1.244878ms 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T12:54:06+03:00","message":"http server stopped"}
+{"level":"info","time":"2023-11-09T12:58:35+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T12:58:35+03:00","message":"http server started on 0.0.0.0:8081"}
+{"level":"info","time":"2023-11-09T12:59:11+03:00","message":"127.0.0.1 [2023-11-09 12:59:11.961502598 +0300 MSK m=+36.724576368] POST /register HTTP/1.1 200 12.17027ms 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T12:59:14+03:00","message":"127.0.0.1 [2023-11-09 12:59:14.825291841 +0300 MSK m=+39.588365611] POST /login HTTP/1.1 200 1.045143ms 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T12:59:17+03:00","message":"127.0.0.1 [2023-11-09 12:59:17.865074033 +0300 MSK m=+42.628147802] GET /auth HTTP/1.1 200 513.293µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:04:09+03:00","message":"http server stopped"}
+{"level":"info","time":"2023-11-09T13:04:17+03:00","message":"auth_service is running..."}
+{"level":"info","time":"2023-11-09T13:04:17+03:00","message":"http server started on 0.0.0.0:8081"}
+{"level":"info","time":"2023-11-09T13:05:06+03:00","message":"127.0.0.1 [2023-11-09 13:05:06.745117633 +0300 MSK m=+49.396431882] POST /register HTTP/1.1 200 21.229494ms 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:05:09+03:00","message":"127.0.0.1 [2023-11-09 13:05:09.726777314 +0300 MSK m=+52.378091555] POST /login HTTP/1.1 200 886.418µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:05:12+03:00","message":"127.0.0.1 [2023-11-09 13:05:12.689590887 +0300 MSK m=+55.340905135] GET /auth HTTP/1.1 200 102.588µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:05:19+03:00","message":"127.0.0.1 [2023-11-09 13:05:19.045613403 +0300 MSK m=+61.696927673] GET /logout HTTP/1.1 200 24.118µs 'PostmanRuntime/7.33.0'"}
+{"level":"error","time":"2023-11-09T13:05:33+03:00","message":"User not found"}
+{"level":"info","time":"2023-11-09T13:05:33+03:00","message":"127.0.0.1 [2023-11-09 13:05:33.812254586 +0300 MSK m=+76.463568838] GET /auth HTTP/1.1 401 147.317µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:05:57+03:00","message":"127.0.0.1 [2023-11-09 13:05:57.299345338 +0300 MSK m=+99.950659577] POST /login HTTP/1.1 200 408.749µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:06:00+03:00","message":"127.0.0.1 [2023-11-09 13:06:00.653784186 +0300 MSK m=+103.305098429] GET /auth HTTP/1.1 200 80.623µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:06:03+03:00","message":"127.0.0.1 [2023-11-09 13:06:03.31955249 +0300 MSK m=+105.970866739] GET /logout HTTP/1.1 200 19.452µs 'PostmanRuntime/7.33.0'"}
+{"level":"error","time":"2023-11-09T13:06:06+03:00","message":"User not found"}
+{"level":"info","time":"2023-11-09T13:06:06+03:00","message":"127.0.0.1 [2023-11-09 13:06:06.088972136 +0300 MSK m=+108.740286375] GET /auth HTTP/1.1 401 119.365µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:06:09+03:00","message":"127.0.0.1 [2023-11-09 13:06:09.939149541 +0300 MSK m=+112.590463789] POST /login HTTP/1.1 200 681.814µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:06:12+03:00","message":"127.0.0.1 [2023-11-09 13:06:12.191139559 +0300 MSK m=+114.842453816] GET /auth HTTP/1.1 200 108.592µs 'PostmanRuntime/7.33.0'"}
+{"level":"info","time":"2023-11-09T13:49:32+03:00","message":"http server stopped"}
