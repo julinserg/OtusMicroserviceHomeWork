@@ -13,7 +13,7 @@ import (
 
 func hellowHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("This is my auth service!"))
+	w.Write([]byte("This is my auth service 2!"))
 }
 
 type userHandler struct {
@@ -120,16 +120,17 @@ func (h *userHandler) authHandler(w http.ResponseWriter, r *http.Request) {
 	if !h.checkErrorAndSendResponse(err, http.StatusInternalServerError, w) {
 		return
 	}
+
+	w.Header().Set("x-userid", strconv.Itoa(int(user.Id)))
+	w.Header().Set("x-user", user.Login)
+	w.Header().Set("x-email", user.Email)
+	w.Header().Set("x-first-name", user.FirstName)
+	w.Header().Set("x-last-name", user.LastName)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	_, err = w.Write(resBuf)
 	if !h.checkErrorAndSendResponse(err, http.StatusInternalServerError, w) {
 		return
 	}
-	w.Header().Set("X-UserId", strconv.Itoa(int(user.Id)))
-	w.Header().Set("X-User", user.Login)
-	w.Header().Set("X-Email", user.Email)
-	w.Header().Set("X-First-Name", user.FirstName)
-	w.Header().Set("X-Last-Name", user.LastName)
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }
 

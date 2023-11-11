@@ -6,3 +6,4 @@ data:
   loglevel: "INFO"
   httphost: "0.0.0.0"
   httpport: "8090"
+  httpportauth: "9000"

@@ -15,13 +15,13 @@ run-auth: build
 	$(BIN_CMD_AUTH) -config ./configs/auth_config.toml
 
 dbuild:
-	docker-compose -f ./deployments/docker-compose.yaml build --no-cache
+	docker compose -f ./deployments/docker-compose.yaml build --no-cache
 
 up:
-	docker-compose -f ./deployments/docker-compose.yaml up --build
+	docker compose -f ./deployments/docker-compose.yaml up --build
 
 down:
-	docker-compose -f ./deployments/docker-compose.yaml down
+	docker compose -f ./deployments/docker-compose.yaml down
 
 version: build
 	$(BIN_CMD) version

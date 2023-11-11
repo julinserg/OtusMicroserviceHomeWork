@@ -47,7 +47,7 @@ func NewServer(logger Logger, storage Storage, endpoint string) *Server {
 	}
 	initPrometheus()
 	uh := userHandler{logger, storage}
-	mux.HandleFunc("/health", hellowHandler)
+	mux.HandleFunc("/users/health", hellowHandler)
 	mux.HandleFunc("/users/me", uh.commonHandler)
 	mux.Handle("/metrics", promhttp.Handler())
 	return &Server{server, logger, endpoint}

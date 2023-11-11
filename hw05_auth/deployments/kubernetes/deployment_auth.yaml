@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: users-service-deployment
+  name: users-service-deployment-auth
   labels:
-    app: users-service
+    app: users-service-auth
 spec:
   selector:
     matchLabels:
-      app: users-service
+      app: users-service-auth
   replicas: 1
   template:
     metadata:
       labels:
-        app: users-service
+        app: users-service-auth
     spec:
       containers:
-        - name: users-service
-          image: julinserg/users_service_auth_docker_image:latest
+        - name: users-service-auth
+          image: julinserg/auth_service_auth_docker_image:latest
           ports:
-            - containerPort: 8090
+            - containerPort: 9000
           env:
             - name: USC_LOG_LEVEL
               valueFrom:
@@ -34,7 +34,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: users-service-configmap
-                  key: httpport
+                  key: httpportauth
             - name: USC_PG_HOST
               value: "pg1-postgresql"
             - name: USC_PG_USER
