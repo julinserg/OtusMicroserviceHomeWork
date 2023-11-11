@@ -62,7 +62,7 @@ func (h *userHandler) checkErrorAndSendResponse(err error, code int, w http.Resp
 
 func (h *userHandler) FindUserById(w http.ResponseWriter, r *http.Request) {
 
-	userId := w.Header().Get("x-userid")
+	userId := r.Header.Get("X-User-Id")
 	if len(userId) == 0 {
 		h.checkErrorAndSendResponse(fmt.Errorf("Not authenticated"), http.StatusInternalServerError, w)
 		return
@@ -70,10 +70,10 @@ func (h *userHandler) FindUserById(w http.ResponseWriter, r *http.Request) {
 	userFull := &users_app.UserFull{}
 	id, _ := strconv.Atoi(userId)
 	userFull.Id = int64(id)
-	userFull.Login = w.Header().Get("x-user")
-	userFull.FirstName = w.Header().Get("x-first-xame")
-	userFull.LastName = w.Header().Get("x-last-name")
-	userFull.Email = w.Header().Get("x-email")
+	userFull.Login = r.Header.Get("X-User")
+	userFull.FirstName = r.Header.Get("X-First-Name")
+	userFull.LastName = r.Header.Get("X-Last-Name")
+	userFull.Email = r.Header.Get("X-Email")
 
 	userProfile, err := h.storage.FindUserById(userId)
 	if userProfile.Id != 0 {
@@ -95,7 +95,7 @@ func (h *userHandler) FindUserById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *userHandler) CreateOrUpdateUser(w http.ResponseWriter, r *http.Request) {
-	userId := w.Header().Get("x-userid")
+	userId := r.Header.Get("X-User-Id")
 	if len(userId) == 0 {
 		h.checkErrorAndSendResponse(fmt.Errorf("Not authenticated"), http.StatusInternalServerError, w)
 		return

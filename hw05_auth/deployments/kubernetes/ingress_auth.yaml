@@ -43,3 +43,10 @@ spec:
                 name: users-service-auth
                 port:
                   number: 9000
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: users-service-auth
+                port:
+                  number: 9000
