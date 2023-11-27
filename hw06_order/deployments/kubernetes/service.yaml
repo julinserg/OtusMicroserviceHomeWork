@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-service
+  labels:
+    app: users-service
+spec:
+  selector:
+    app: users-service
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      name: metrics
+      port: 8090
+      targetPort: 8090
