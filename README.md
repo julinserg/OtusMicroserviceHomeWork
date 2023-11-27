@@ -1,1 +1,1 @@
-# OtusMicroserviceHomeWork
+## Домашние задания курса [OTUS «Microservice Architecture»]([https://otus.ru/lessons/golang-professional/?utm_source=github&utm_medium=free&utm_campaign=otus](https://otus.ru/lessons/microservice-architecture/)https://otus.ru/lessons/microservice-architecture/)
