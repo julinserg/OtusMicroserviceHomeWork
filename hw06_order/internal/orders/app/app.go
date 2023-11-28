@@ -7,7 +7,14 @@ import (
 var (
 	ErrOrderIDNotSet   = errors.New("Order ID not set")
 	ErrOrderIDNotExist = errors.New("Order ID not exist")
+	ErrRequestIDNotSet = errors.New("Request ID not set")
 )
+
+type Request struct {
+	Id        string `db:"id"`
+	Code      int    `db:"response_code"`
+	ErrorText string `db:"error_text"`
+}
 
 type Product struct {
 	Id    int64  `json:"id" db:"id"`
@@ -24,4 +31,6 @@ type Order struct {
 type Storage interface {
 	CreateSchema() error
 	CreateOrder(order Order) error
+	GetRequest(id string) (Request, error)
+	SaveRequest(obj Request) error
 }

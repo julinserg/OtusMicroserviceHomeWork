@@ -31,6 +31,10 @@ func (s *Storage) Connect(ctx context.Context, dsn string) error {
 func (s *Storage) CreateSchema() error {
 	var err error
 	_, err = s.db.Query(`CREATE TABLE IF NOT EXISTS orders (id text primary key, products jsonb, shipping_to text);`)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Query(`CREATE TABLE IF NOT EXISTS requests (id text primary key, response_code int, error_text text);`)
 	return err
 }
 
@@ -55,4 +59,39 @@ func (s *Storage) CreateOrder(order orders_app.Order) error {
 			"shipping_to": order.ShippingTo,
 		})
 	return err
+}
+
+func (s *Storage) SaveRequest(obj orders_app.Request) error {
+	if len(obj.Id) == 0 {
+		return orders_app.ErrRequestIDNotSet
+	}
+
+	_, err := s.db.NamedExec(`INSERT INTO requests (id, response_code, error_text)
+		 VALUES (:id,:response_code,:error_text)`,
+		map[string]interface{}{
+			"id":            obj.Id,
+			"response_code": obj.Code,
+			"error_text":    obj.ErrorText,
+		})
+	return err
+}
+
+func (s *Storage) GetRequest(id string) (orders_app.Request, error) {
+	req := orders_app.Request{}
+	if len(id) == 0 {
+		return req, orders_app.ErrRequestIDNotSet
+	}
+
+	rows, err := s.db.NamedQuery(`SELECT * FROM requests WHERE id=:id`, map[string]interface{}{"id": id})
+	if err != nil {
+		return req, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.StructScan(&req)
+		if err != nil {
+			return req, err
+		}
+	}
+	return req, nil
 }

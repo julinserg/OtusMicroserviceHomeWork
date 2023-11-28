@@ -10,6 +10,8 @@ import (
 
 type Storage interface {
 	CreateOrder(user orders_app.Order) error
+	GetRequest(id string) (orders_app.Request, error)
+	SaveRequest(obj orders_app.Request) error
 }
 
 type Server struct {

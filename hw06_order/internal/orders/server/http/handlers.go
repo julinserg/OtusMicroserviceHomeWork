@@ -2,6 +2,7 @@ package order_internalhttp
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -44,12 +45,13 @@ func (h *ordersHandler) WriteResponseError(w http.ResponseWriter, resp *Response
 	return
 }
 
-func (h *ordersHandler) checkErrorAndSendResponse(err error, code int, w http.ResponseWriter) bool {
+func (h *ordersHandler) checkErrorAndSendResponse(requestId string, err error, code int, w http.ResponseWriter) bool {
 	if err != nil {
 		resp := &ResponseError{}
 		resp.Code = code
 		resp.Message = err.Error()
 		h.logger.Error(resp.Message)
+		h.storage.SaveRequest(orders_app.Request{Id: requestId, Code: code, ErrorText: err.Error()})
 		w.WriteHeader(code)
 		h.WriteResponseError(w, resp)
 		return false
@@ -58,28 +60,49 @@ func (h *ordersHandler) checkErrorAndSendResponse(err error, code int, w http.Re
 }
 
 func (h *ordersHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
+	requestId := r.Header.Get("X-Request-Id")
+	if len(requestId) == 0 {
+		h.checkErrorAndSendResponse("", fmt.Errorf("Header X-Request-Id not set"), http.StatusBadRequest, w)
+		return
+	}
+	reqId, err := h.storage.GetRequest(requestId)
+	if len(reqId.Id) != 0 {
+		if len(reqId.ErrorText) != 0 {
+			resp := &ResponseError{}
+			resp.Code = reqId.Code
+			resp.Message = reqId.ErrorText
+			h.logger.Error(resp.Message)
+			w.WriteHeader(reqId.Code)
+			h.WriteResponseError(w, resp)
+			return
+		} else {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(reqId.Code)
+			return
+		}
+	}
 
 	body, err := ioutil.ReadAll(r.Body)
-	if !h.checkErrorAndSendResponse(err, http.StatusBadRequest, w) {
+	if !h.checkErrorAndSendResponse(requestId, err, http.StatusBadRequest, w) {
 		return
 	}
 
 	order := &orders_app.Order{}
 	err = json.Unmarshal(body, order)
-	if !h.checkErrorAndSendResponse(err, http.StatusBadRequest, w) {
+	if !h.checkErrorAndSendResponse(requestId, err, http.StatusBadRequest, w) {
 		return
 	}
 
 	orderUUID, err := uuid.NewV4()
-	if !h.checkErrorAndSendResponse(err, http.StatusInternalServerError, w) {
+	if !h.checkErrorAndSendResponse(requestId, err, http.StatusInternalServerError, w) {
 		return
 	}
 	order.Id = orderUUID.String()
 	err = h.storage.CreateOrder(*order)
-	if !h.checkErrorAndSendResponse(err, http.StatusInternalServerError, w) {
+	if !h.checkErrorAndSendResponse(requestId, err, http.StatusInternalServerError, w) {
 		return
 	}
-
+	h.storage.SaveRequest(orders_app.Request{Id: requestId, Code: http.StatusOK, ErrorText: ""})
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	return
