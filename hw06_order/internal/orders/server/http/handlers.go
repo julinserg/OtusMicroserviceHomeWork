@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/gofrs/uuid"
 	orders_app "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw06_order/internal/orders/app"
@@ -25,10 +26,17 @@ type ResponseError struct {
 	Message string `json:"message"`
 }
 
-func (h *ordersHandler) commonHandler(w http.ResponseWriter, r *http.Request) {
+func (h *ordersHandler) createHandler(w http.ResponseWriter, r *http.Request) {
 	switch method := r.Method; method {
 	case "POST":
 		h.CreateOrder(w, r)
+	}
+}
+
+func (h *ordersHandler) countHandler(w http.ResponseWriter, r *http.Request) {
+	switch method := r.Method; method {
+	case "GET":
+		h.CountOrder(w, r)
 	}
 }
 
@@ -51,7 +59,7 @@ func (h *ordersHandler) checkErrorAndSendResponse(requestId string, err error, c
 		resp.Code = code
 		resp.Message = err.Error()
 		h.logger.Error(resp.Message)
-		h.storage.SaveRequest(orders_app.Request{Id: requestId, Code: code, ErrorText: err.Error()})
+		h.storage.UpdateRequest(orders_app.Request{Id: requestId, Code: code, ErrorText: err.Error()})
 		w.WriteHeader(code)
 		h.WriteResponseError(w, resp)
 		return false
@@ -65,8 +73,8 @@ func (h *ordersHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		h.checkErrorAndSendResponse("", fmt.Errorf("Header X-Request-Id not set"), http.StatusBadRequest, w)
 		return
 	}
-	reqId, err := h.storage.GetRequest(requestId)
-	if len(reqId.Id) != 0 {
+	reqId, err := h.storage.GetOrCreateRequest(requestId)
+	if !reqId.IsNew {
 		if len(reqId.ErrorText) != 0 {
 			resp := &ResponseError{}
 			resp.Code = reqId.Code
@@ -102,8 +110,19 @@ func (h *ordersHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	if !h.checkErrorAndSendResponse(requestId, err, http.StatusInternalServerError, w) {
 		return
 	}
-	h.storage.SaveRequest(orders_app.Request{Id: requestId, Code: http.StatusOK, ErrorText: ""})
+	h.storage.UpdateRequest(orders_app.Request{Id: requestId, Code: http.StatusOK, ErrorText: ""})
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
+	return
+}
+
+func (h *ordersHandler) CountOrder(w http.ResponseWriter, r *http.Request) {
+	result, err := h.storage.GetOrdersCount()
+	if !h.checkErrorAndSendResponse("", err, http.StatusInternalServerError, w) {
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{ \"count\" :" + strconv.Itoa(result) + "}"))
 	return
 }

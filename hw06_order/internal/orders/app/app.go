@@ -14,6 +14,7 @@ type Request struct {
 	Id        string `db:"id"`
 	Code      int    `db:"response_code"`
 	ErrorText string `db:"error_text"`
+	IsNew     bool
 }
 
 type Product struct {
@@ -31,6 +32,7 @@ type Order struct {
 type Storage interface {
 	CreateSchema() error
 	CreateOrder(order Order) error
-	GetRequest(id string) (Request, error)
-	SaveRequest(obj Request) error
+	GetOrdersCount() (int, error)
+	GetOrCreateRequest(id string) (Request, error)
+	UpdateRequest(obj Request) error
 }

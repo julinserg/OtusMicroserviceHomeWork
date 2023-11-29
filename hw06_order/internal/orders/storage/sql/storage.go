@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	// Register pgx driver for postgresql.
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -61,28 +62,56 @@ func (s *Storage) CreateOrder(order orders_app.Order) error {
 	return err
 }
 
-func (s *Storage) SaveRequest(obj orders_app.Request) error {
+func (s *Storage) GetOrdersCount() (int, error) {
+	result := 0
+	rows, err := s.db.Query(`SELECT COUNT(*) FROM orders`)
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&result)
+		if err != nil {
+			return result, err
+		}
+	}
+	return result, nil
+}
+
+func (s *Storage) UpdateRequest(obj orders_app.Request) error {
 	if len(obj.Id) == 0 {
 		return orders_app.ErrRequestIDNotSet
 	}
 
-	_, err := s.db.NamedExec(`INSERT INTO requests (id, response_code, error_text)
-		 VALUES (:id,:response_code,:error_text)`,
+	result, err := s.db.NamedExec(`UPDATE requests SET response_code=:response_code, 
+	error_text=:error_text WHERE id = `+`'`+obj.Id+`'`,
 		map[string]interface{}{
-			"id":            obj.Id,
 			"response_code": obj.Code,
 			"error_text":    obj.ErrorText,
 		})
+	if result != nil {
+		rowAffected, errResult := result.RowsAffected()
+		if err == nil && rowAffected == 0 && errResult == nil {
+			return orders_app.ErrRequestIDNotSet
+		}
+	}
 	return err
 }
 
-func (s *Storage) GetRequest(id string) (orders_app.Request, error) {
-	req := orders_app.Request{}
+func (s *Storage) GetOrCreateRequest(id string) (orders_app.Request, error) {
+	req := orders_app.Request{IsNew: false}
 	if len(id) == 0 {
 		return req, orders_app.ErrRequestIDNotSet
 	}
 
-	rows, err := s.db.NamedQuery(`SELECT * FROM requests WHERE id=:id`, map[string]interface{}{"id": id})
+	tx, err := s.db.Beginx()
+	if err != nil {
+		return req, err
+	}
+	defer tx.Rollback()
+
+	rows, err := tx.NamedQuery(`SELECT * FROM requests WHERE id=:id`, map[string]interface{}{"id": id})
 	if err != nil {
 		return req, err
 	}
@@ -92,6 +121,23 @@ func (s *Storage) GetRequest(id string) (orders_app.Request, error) {
 		if err != nil {
 			return req, err
 		}
+	}
+	if len(req.Id) == 0 {
+		_, err = tx.NamedExec(`INSERT INTO requests (id, response_code, error_text)
+		 VALUES (:id,:response_code,:error_text)`,
+			map[string]interface{}{
+				"id":            id,
+				"response_code": http.StatusAccepted,
+				"error_text":    "",
+			})
+		if err != nil {
+			return req, err
+		}
+		req.IsNew = true
+	}
+	err = tx.Commit()
+	if err != nil {
+		return req, err
 	}
 	return req, nil
 }

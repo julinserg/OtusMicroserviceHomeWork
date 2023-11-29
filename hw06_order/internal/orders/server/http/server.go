@@ -10,8 +10,9 @@ import (
 
 type Storage interface {
 	CreateOrder(user orders_app.Order) error
-	GetRequest(id string) (orders_app.Request, error)
-	SaveRequest(obj orders_app.Request) error
+	GetOrdersCount() (int, error)
+	GetOrCreateRequest(id string) (orders_app.Request, error)
+	UpdateRequest(obj orders_app.Request) error
 }
 
 type Server struct {
@@ -45,9 +46,10 @@ func NewServer(logger Logger, storage Storage, endpoint string) *Server {
 		Handler: loggingMiddleware(mux, logger),
 	}
 
-	uh := ordersHandler{logger, storage}
+	uh := ordersHandler{logger :logger, storage :storage}
 	mux.HandleFunc("/api/v1/orders/health", hellowHandler)
-	mux.HandleFunc("/api/v1/orders/create", uh.commonHandler)
+	mux.HandleFunc("/api/v1/orders/create", uh.createHandler)
+	mux.HandleFunc("/api/v1/orders/count", uh.countHandler)
 	return &Server{server, logger, endpoint}
 }
 
