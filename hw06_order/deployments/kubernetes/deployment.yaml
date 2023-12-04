@@ -1,39 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: users-service-deployment
+  name: order-service-deployment
   labels:
-    app: users-service
+    app: order-service
 spec:
   selector:
     matchLabels:
-      app: users-service
-  replicas: 1
+      app: order-service
+  replicas: 3
   template:
     metadata:
       labels:
-        app: users-service
+        app: order-service
     spec:
       containers:
-        - name: users-service
-          image: julinserg/users_service_auth_docker_image:latest
+        - name: order-service
+          image: julinserg/orders_service_shop_docker_image:latest
           ports:
             - containerPort: 8090
           env:
             - name: USC_LOG_LEVEL
               valueFrom:
                 configMapKeyRef:
-                  name: users-service-configmap
+                  name: order-service-configmap
                   key: loglevel
             - name: USC_HTTP_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: users-service-configmap
+                  name: order-service-configmap
                   key: httphost
             - name: USC_HTTP_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: users-service-configmap
+                  name: order-service-configmap
                   key: httpport
             - name: USC_PG_HOST
               value: "pg1-postgresql"
@@ -42,7 +42,7 @@ spec:
             - name: USC_PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: users-service-secret
+                  name: order-service-secret
                   key: password
             - name: USC_PG_DB
               value: "users"

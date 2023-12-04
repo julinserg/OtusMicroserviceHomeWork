@@ -1,21 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: users-service-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/auth-url: "http://$host/auth"
-    nginx.ingress.kubernetes.io/auth-signin: "http://$host/signin"
-    nginx.ingress.kubernetes.io/auth-response-headers: "X-User,X-Email,X-User-Id,X-First-Name,X-Last-Name"
+  name: order-service-ingress
 spec:
   ingressClassName: nginx
   rules:
     - host: arch.homework
       http:
         paths:
-          - path: /users
+          - path: /api/v1/orders
             pathType: Prefix
             backend:
               service:
-                name: users-service
+                name: order-service
                 port:
                   number: 8090
