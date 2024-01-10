@@ -1,0 +1,67 @@
+version: "3"
+networks:
+  db:
+    driver: bridge
+
+services:
+  order_service_saga:
+    build:
+      context: ../
+      dockerfile: ./build/DockerfileOrder
+    image: order_service_saga_docker_image
+    environment:
+      USC_LOG_LEVEL: INFO
+      USC_HTTP_HOST: 0.0.0.0
+      USC_HTTP_PORT: 8090
+      USC_PG_HOST: postgres
+      USC_PG_USER: sergey
+      USC_PG_PASSWORD: sergey
+      USC_PG_DB: users
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "8090:8090"
+    expose:
+      - 8090
+    networks:
+      - db
+
+  pay_service_saga:
+    build:
+      context: ../
+      dockerfile: ./build/DockerfilePay
+    image: pay_service_saga_docker_image
+    environment:
+      USC_LOG_LEVEL: INFO
+      USC_HTTP_HOST: 0.0.0.0
+      USC_HTTP_PORT: 8090
+      USC_PG_HOST: postgres
+      USC_PG_USER: sergey
+      USC_PG_PASSWORD: sergey
+      USC_PG_DB: users
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "9000:9000"
+    expose:
+      - 9000
+    networks:
+      - db
+
+  postgres:
+    image: postgres:11.1
+    environment:
+      POSTGRES_USER: sergey
+      POSTGRES_PASSWORD: sergey
+      POSTGRES_DB: users
+    networks:
+      - db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d users -U sergey " ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
