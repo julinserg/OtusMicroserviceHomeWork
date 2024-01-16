@@ -18,7 +18,7 @@ services:
       USC_PG_HOST: postgres
       USC_PG_USER: sergey
       USC_PG_PASSWORD: sergey
-      USC_PG_DB: users
+      USC_PG_DB: shop
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,11 +39,11 @@ services:
     environment:
       USC_LOG_LEVEL: INFO
       USC_HTTP_HOST: 0.0.0.0
-      USC_HTTP_PORT: 8090
+      USC_HTTP_PORT: 9000
       USC_PG_HOST: postgres
       USC_PG_USER: sergey
       USC_PG_PASSWORD: sergey
-      USC_PG_DB: users
+      USC_PG_DB: shop
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,11 +61,11 @@ services:
     environment:
       POSTGRES_USER: sergey
       POSTGRES_PASSWORD: sergey
-      POSTGRES_DB: users
+      POSTGRES_DB: shop
     networks:
       - db
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d users -U sergey " ]
+      test: [ "CMD-SHELL", "pg_isready -d shop -U sergey " ]
       interval: 5s
       timeout: 5s
       retries: 5

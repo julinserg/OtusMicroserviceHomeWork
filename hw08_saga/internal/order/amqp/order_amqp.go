@@ -11,6 +11,10 @@ import (
 	"github.com/streadway/amqp"
 )
 
+const exchangeOrder = "exchange_order"
+const exchangeStatus = "exchange_status"
+const queueStatus = "queue_status"
+
 type Logger interface {
 	Info(msg string)
 	Error(msg string)
@@ -23,34 +27,18 @@ type Storage interface {
 }
 
 type SrvOrderAMQP struct {
-	logger           Logger
-	storage          Storage
-	pub              amqp_pub.AmqpPub
-	uri              string
-	consumer         string
-	queue            string
-	exchange         string
-	exchangeType     string
-	routingKey       string
-	exchangeUser     string
-	exchangeUserType string
+	logger  Logger
+	storage Storage
+	pub     amqp_pub.AmqpPub
+	uri     string
 }
 
-func New(logger Logger, storage Storage, uri string, consumer string,
-	queue string, exchange string, exchangeType string,
-	routingKey string, exchangeUser string, exchangeUserType string) *SrvOrderAMQP {
+func New(logger Logger, storage Storage, uri string) *SrvOrderAMQP {
 	return &SrvOrderAMQP{
-		logger:           logger,
-		storage:          storage,
-		pub:              *amqp_pub.New(logger),
-		uri:              uri,
-		consumer:         consumer,
-		queue:            queue,
-		exchange:         exchange,
-		exchangeType:     exchangeType,
-		routingKey:       routingKey,
-		exchangeUser:     exchangeUser,
-		exchangeUserType: exchangeUserType,
+		logger:  logger,
+		storage: storage,
+		pub:     *amqp_pub.New(logger),
+		uri:     uri,
 	}
 }
 
@@ -60,13 +48,13 @@ func (a *SrvOrderAMQP) Start(ctx context.Context) error {
 		return err
 	}
 
-	c := amqp_sub.New(a.consumer, conn, a.logger)
-	msgs, err := c.Consume(ctx, a.queue, a.exchange, a.exchangeType, a.routingKey)
+	c := amqp_sub.New("SrvOrderAMQP", conn, a.logger)
+	msgs, err := c.Consume(ctx, queueStatus, exchangeStatus, "direct", "")
 	if err != nil {
 		return err
 	}
 
-	err = a.pub.CreateExchange(a.uri, a.exchangeUser, a.exchangeUserType)
+	err = a.pub.CreateExchange(a.uri, exchangeOrder, "direct")
 	if err != nil {
 		return err
 	}
@@ -90,7 +78,7 @@ func (a *SrvOrderAMQP) Publish(order order_app.Order) error {
 	if err != nil {
 		return err
 	}
-	if err := a.pub.Publish(a.uri, a.exchangeUser, a.exchangeUserType, "", string(orderStr), true); err != nil {
+	if err := a.pub.Publish(a.uri, exchangeOrder, "direct", "forPayService", string(orderStr), true); err != nil {
 		return err
 	}
 	a.logger.Info("publish order for queue is OK ( OrderId: " + order.Id + ")")

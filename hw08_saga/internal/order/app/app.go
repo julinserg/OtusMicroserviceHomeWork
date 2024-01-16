@@ -28,7 +28,7 @@ type Order struct {
 	Products   []Product `json:"products"`
 	ShippingTo string    `json:"shipping_to"`
 	CardParams string    `json:"card_params"`
-	Status     string    `json:"status"`
+	Status     string    `json:"status"` // "CREATED"/"CANCELED"/"COMPLETED"/"PAYED"/"RESERVED"/"DELIVERED"
 }
 
 type OrderEvent struct {
@@ -41,8 +41,6 @@ type Storage interface {
 	CreateOrder(order Order) error
 	UpdateOrderStatus(idOrder string, status string) error
 	GetOrdersCount() (int, error)
-	GetOrCreateRequest(id string) (Request, error)
-	UpdateRequest(obj Request) error
 }
 
 type Logger interface {
@@ -67,6 +65,7 @@ func New(logger Logger, storage Storage, mq OrderMQ) *SrvOrder {
 }
 
 func (a *SrvOrder) CreateOrder(order Order) error {
+	order.Status = "CREATED"
 	err := a.storage.CreateOrder(order)
 	if err != nil {
 		return err

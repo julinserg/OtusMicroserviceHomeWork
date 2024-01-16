@@ -27,14 +27,7 @@ type HTTPConfig struct {
 }
 
 type AMQPConfig struct {
-	URI              string
-	Exchange         string
-	ExchangeType     string
-	Key              string
-	Queue            string
-	Consumer         string
-	ExchangeUser     string
-	ExchangeUserType string
+	URI string
 }
 
 func (c *Config) Read(fpath string) error {

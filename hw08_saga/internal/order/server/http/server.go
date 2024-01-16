@@ -13,11 +13,6 @@ type SrvOrder interface {
 	GetOrdersCount() (int, error)
 }
 
-type Storage interface {
-	GetOrCreateRequest(id string) (order_app.Request, error)
-	UpdateRequest(obj order_app.Request) error
-}
-
 type Server struct {
 	server   *http.Server
 	logger   Logger
@@ -41,7 +36,7 @@ func (r *StatusRecorder) WriteHeader(status int) {
 	r.ResponseWriter.WriteHeader(status)
 }
 
-func NewServer(logger Logger, storage Storage, srvOrder SrvOrder, endpoint string) *Server {
+func NewServer(logger Logger, srvOrder SrvOrder, endpoint string) *Server {
 	mux := http.NewServeMux()
 
 	server := &http.Server{
@@ -49,7 +44,7 @@ func NewServer(logger Logger, storage Storage, srvOrder SrvOrder, endpoint strin
 		Handler: loggingMiddleware(mux, logger),
 	}
 
-	uh := ordersHandler{logger: logger, storage: storage, srvOrder: srvOrder}
+	uh := ordersHandler{logger: logger, srvOrder: srvOrder}
 	mux.HandleFunc("/api/v1/orders/health", hellowHandler)
 	mux.HandleFunc("/api/v1/orders/create", uh.createHandler)
 	mux.HandleFunc("/api/v1/orders/count", uh.countHandler)

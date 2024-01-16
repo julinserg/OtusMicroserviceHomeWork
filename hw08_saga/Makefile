@@ -18,10 +18,10 @@ dbuild:
 	docker compose -f ./deployments/docker-compose.yaml build --no-cache
 
 up:
-	docker compose -f ./deployments/docker-compose.yaml up --build
+	docker compose -f ./deployments/docker-compose.yaml up
 
 down:
-	docker compose -f ./deployments/docker-compose.yaml down
+	docker compose -f ./deployments/docker-compose.yaml down --rmi all
 
 version: build
 	$(BIN_CMD_ORDER) version

@@ -84,14 +84,12 @@ func main() {
 		storage = sqlstor
 	}
 
-	orderMQ := order_amqp.New(logg, storage, config.AMQP.URI,
-		config.AMQP.Consumer, config.AMQP.Queue, config.AMQP.Exchange, config.AMQP.ExchangeType, config.AMQP.Key,
-		config.AMQP.ExchangeUser, config.AMQP.ExchangeUserType)
+	orderMQ := order_amqp.New(logg, storage, config.AMQP.URI)
 
 	srvOrder := order_app.New(logg, storage, orderMQ)
 
 	endpointHttp := net.JoinHostPort(config.HTTP.Host, config.HTTP.Port)
-	serverHttp := order_internalhttp.NewServer(logg, storage, srvOrder, endpointHttp)
+	serverHttp := order_internalhttp.NewServer(logg, srvOrder, endpointHttp)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
