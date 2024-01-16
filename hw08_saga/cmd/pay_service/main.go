@@ -5,16 +5,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/logger"
+	pay_amqp "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/pay/amqp"
 	pay_app "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/pay/app"
-	pay_internalhttp "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/pay/server/http"
 	pay_sqlstorage "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/pay/storage/sql"
 )
 
@@ -42,12 +40,6 @@ func main() {
 		var value string
 		value, _ = os.LookupEnv("USC_LOG_LEVEL")
 		config.Logger.Level = value
-		value, _ = os.LookupEnv("USC_HTTP_HOST")
-		config.HTTP.Host = value
-		value, _ = os.LookupEnv("USC_HTTP_PORT")
-		config.HTTP.Port = value
-		value, _ = os.LookupEnv("USC_HTTP_PORT")
-		config.HTTP.Port = value
 		dbHost, _ := os.LookupEnv("USC_PG_HOST")
 		dbUser, _ := os.LookupEnv("USC_PG_USER")
 		dbPassword, _ := os.LookupEnv("USC_PG_PASSWORD")
@@ -83,23 +75,11 @@ func main() {
 		storage = sqlstor
 	}
 
-	endpointHttp := net.JoinHostPort(config.HTTP.Host, config.HTTP.Port)
-	serverHttp := pay_internalhttp.NewServer(logg, storage, endpointHttp)
+	payMQ := pay_amqp.New(logg, storage, config.AMQP.URI)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
-
-	go func() {
-		<-ctx.Done()
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-		defer cancel()
-
-		if err := serverHttp.Stop(ctx); err != nil {
-			logg.Error("failed to stop http server: " + err.Error())
-		}
-	}()
 
 	logg.Info("pay_service is running...")
 
@@ -107,8 +87,8 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := serverHttp.Start(ctx); err != nil {
-			logg.Error("failed to start http server: " + err.Error())
+		if err := payMQ.Start(ctx); err != nil {
+			logg.Error("failed to start MQ worker: " + err.Error())
 			cancel()
 			return
 		}

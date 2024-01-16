@@ -11,7 +11,7 @@ build:
 run: build
 	$(BIN_CMD_ORDER) -config ./configs/order_config.toml
 
-run-auth: build
+run-pay: build
 	$(BIN_CMD_PAY) -config ./configs/pay_config.toml
 
 dbuild:

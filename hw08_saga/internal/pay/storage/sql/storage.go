@@ -7,7 +7,6 @@ import (
 	// Register pgx driver for postgresql.
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
-	pay_app "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/pay/app"
 )
 
 type Storage struct {
@@ -36,31 +35,4 @@ func (s *Storage) CreateSchema() error {
 
 func (s *Storage) Close() error {
 	return s.db.Close()
-}
-
-func (s *Storage) GetUser(login string, password string) (pay_app.UserAuth, error) {
-	user := pay_app.UserAuth{}
-	rows, err := s.db.NamedQuery(`SELECT * FROM users_auth WHERE login=:login AND password=:password`,
-		map[string]interface{}{"login": login, "password": password})
-	if err != nil {
-		return user, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.StructScan(&user)
-		if err != nil {
-			return user, err
-		}
-	}
-	user.Password = ""
-	return user, nil
-}
-
-func (s *Storage) RegisterUser(user pay_app.UserAuth) (int, error) {
-	lastInsertId := 0
-	err := s.db.QueryRowx(`INSERT INTO users_auth (login, password, first_name, last_name, email)
-	 VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-		user.Login, user.Password, user.FirstName, user.LastName, user.Email).Scan(&lastInsertId)
-
-	return lastInsertId, err
 }

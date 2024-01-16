@@ -47,8 +47,6 @@ func main() {
 		config.HTTP.Host = value
 		value, _ = os.LookupEnv("USC_HTTP_PORT")
 		config.HTTP.Port = value
-		value, _ = os.LookupEnv("USC_HTTP_PORT")
-		config.HTTP.Port = value
 		dbHost, _ := os.LookupEnv("USC_PG_HOST")
 		dbUser, _ := os.LookupEnv("USC_PG_USER")
 		dbPassword, _ := os.LookupEnv("USC_PG_PASSWORD")

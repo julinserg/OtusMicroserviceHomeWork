@@ -8,7 +8,7 @@ import "github.com/BurntSushi/toml"
 type Config struct {
 	Logger LoggerConf
 	PSQL   PSQLConfig
-	HTTP   HTTPConfig
+	AMQP   AMQPConfig
 }
 
 type LoggerConf struct {
@@ -20,9 +20,8 @@ type PSQLConfig struct {
 	DSN string
 }
 
-type HTTPConfig struct {
-	Host string
-	Port string
+type AMQPConfig struct {
+	URI string
 }
 
 func (c *Config) Read(fpath string) error {

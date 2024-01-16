@@ -1,4 +1,4 @@
-package order_amqp
+package pay_amqp
 
 import (
 	"context"
@@ -20,18 +20,17 @@ type Logger interface {
 }
 
 type Storage interface {
-	UpdateOrderStatus(idOrder string, status string) error
 }
 
-type SrvOrderAMQP struct {
+type SrvPayAMQP struct {
 	logger  Logger
 	storage Storage
 	pub     amqp_pub.AmqpPub
 	uri     string
 }
 
-func New(logger Logger, storage Storage, uri string) *SrvOrderAMQP {
-	return &SrvOrderAMQP{
+func New(logger Logger, storage Storage, uri string) *SrvPayAMQP {
+	return &SrvPayAMQP{
 		logger:  logger,
 		storage: storage,
 		pub:     *amqp_pub.New(logger),
@@ -39,19 +38,14 @@ func New(logger Logger, storage Storage, uri string) *SrvOrderAMQP {
 	}
 }
 
-func (a *SrvOrderAMQP) Start(ctx context.Context) error {
+func (a *SrvPayAMQP) Start(ctx context.Context) error {
 	conn, err := amqp.Dial(a.uri)
 	if err != nil {
 		return err
 	}
-
-	c := amqp_sub.New("SrvOrderAMQP", conn, a.logger)
-	msgs, err := c.Consume(ctx, amqp_settings.QueueStatus, amqp_settings.ExchangeStatus, "direct", "")
-	if err != nil {
-		return err
-	}
-
-	err = a.pub.CreateExchange(a.uri, amqp_settings.ExchangeOrder, "direct")
+	c := amqp_sub.New("SrvPayAMQP", conn, a.logger)
+	msgs, err := c.Consume(ctx, amqp_settings.QueueOrder, amqp_settings.ExchangeOrder,
+		"direct", amqp_settings.RoutingKeyPayService)
 	if err != nil {
 		return err
 	}
@@ -59,18 +53,17 @@ func (a *SrvOrderAMQP) Start(ctx context.Context) error {
 	a.logger.Info("start consuming...")
 
 	for m := range msgs {
-		notifyEvent := order_app.OrderEvent{}
+		notifyEvent := order_app.Order{}
 		json.Unmarshal(m.Data, &notifyEvent)
 		if err != nil {
 			return err
 		}
 		a.logger.Info(fmt.Sprintf("receive new message:%+v\n", notifyEvent))
-		a.storage.UpdateOrderStatus(notifyEvent.Id, notifyEvent.Status)
 	}
 	return nil
 }
 
-func (a *SrvOrderAMQP) Publish(order order_app.Order) error {
+func (a *SrvPayAMQP) publishOrder(order order_app.Order) error {
 	orderStr, err := json.Marshal(order)
 	if err != nil {
 		return err
