@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/logger"
+	order_amqp "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/order/amqp"
 	order_app "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/order/app"
 	order_internalhttp "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/order/server/http"
 	order_sqlstorage "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/order/storage/sql"
@@ -21,7 +22,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "./configs/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "./configs/order_config.toml", "Path to configuration file")
 }
 
 /*
@@ -56,7 +57,7 @@ func main() {
 			dbHost, dbUser, dbPassword, dbName)
 	}
 
-	f, err := os.OpenFile("users_service_logfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
+	f, err := os.OpenFile("order_service_logfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 	if err != nil {
 		log.Fatalln("error opening file: " + err.Error())
 	}
@@ -83,8 +84,14 @@ func main() {
 		storage = sqlstor
 	}
 
+	orderMQ := order_amqp.New(logg, storage, config.AMQP.URI,
+		config.AMQP.Consumer, config.AMQP.Queue, config.AMQP.Exchange, config.AMQP.ExchangeType, config.AMQP.Key,
+		config.AMQP.ExchangeUser, config.AMQP.ExchangeUserType)
+
+	srvOrder := order_app.New(logg, storage, orderMQ)
+
 	endpointHttp := net.JoinHostPort(config.HTTP.Host, config.HTTP.Port)
-	serverHttp := order_internalhttp.NewServer(logg, storage, endpointHttp)
+	serverHttp := order_internalhttp.NewServer(logg, storage, srvOrder, endpointHttp)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -101,14 +108,22 @@ func main() {
 		}
 	}()
 
-	logg.Info("users_service is running...")
+	logg.Info("order_service is running...")
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2)
 	go func() {
 		defer wg.Done()
 		if err := serverHttp.Start(ctx); err != nil {
 			logg.Error("failed to start http server: " + err.Error())
+			cancel()
+			return
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		if err := orderMQ.Start(ctx); err != nil {
+			logg.Error("failed to start MQ worker: " + err.Error())
 			cancel()
 			return
 		}

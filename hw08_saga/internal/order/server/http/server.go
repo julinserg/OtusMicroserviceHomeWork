@@ -6,13 +6,16 @@ import (
 	"net/http"
 
 	order_app "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/order/app"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+type SrvOrder interface {
+	CreateOrder(user order_app.Order) error
+	GetOrdersCount() (int, error)
+}
+
 type Storage interface {
-	CreateUser(user order_app.User) error
-	FindUserById(id string) (order_app.User, error)
-	UpdateUser(user order_app.User) error
+	GetOrCreateRequest(id string) (order_app.Request, error)
+	UpdateRequest(obj order_app.Request) error
 }
 
 type Server struct {
@@ -38,18 +41,18 @@ func (r *StatusRecorder) WriteHeader(status int) {
 	r.ResponseWriter.WriteHeader(status)
 }
 
-func NewServer(logger Logger, storage Storage, endpoint string) *Server {
+func NewServer(logger Logger, storage Storage, srvOrder SrvOrder, endpoint string) *Server {
 	mux := http.NewServeMux()
 
 	server := &http.Server{
 		Addr:    endpoint,
 		Handler: loggingMiddleware(mux, logger),
 	}
-	initPrometheus()
-	uh := userHandler{logger, storage}
-	mux.HandleFunc("/users/health", hellowHandler)
-	mux.HandleFunc("/users/me", uh.commonHandler)
-	mux.Handle("/metrics", promhttp.Handler())
+
+	uh := ordersHandler{logger: logger, storage: storage, srvOrder: srvOrder}
+	mux.HandleFunc("/api/v1/orders/health", hellowHandler)
+	mux.HandleFunc("/api/v1/orders/create", uh.createHandler)
+	mux.HandleFunc("/api/v1/orders/count", uh.countHandler)
 	return &Server{server, logger, endpoint}
 }
 

@@ -2,6 +2,8 @@ version: "3"
 networks:
   db:
     driver: bridge
+  rabbit:
+    driver: bridge
 
 services:
   order_service_saga:
@@ -27,6 +29,7 @@ services:
       - 8090
     networks:
       - db
+      - rabbit
 
   pay_service_saga:
     build:
@@ -51,6 +54,7 @@ services:
       - 9000
     networks:
       - db
+      - rabbit
 
   postgres:
     image: postgres:11.1
@@ -65,3 +69,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  
+  rabbit:
+    image: rabbitmq:3.9.25-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    expose:
+      - 15672
+    networks:
+      - rabbit
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3

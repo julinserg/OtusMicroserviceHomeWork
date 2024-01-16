@@ -15,6 +15,7 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	github.com/rs/zerolog v1.28.0
 	github.com/shopspring/decimal v1.3.1 // indirect
+	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.8.4 // indirect
 	golang.org/x/crypto v0.13.0 // indirect
 )

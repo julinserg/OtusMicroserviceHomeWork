@@ -21,7 +21,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "./configs/auth_config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "./configs/pay_config.toml", "Path to configuration file")
 }
 
 /*
@@ -56,7 +56,7 @@ func main() {
 			dbHost, dbUser, dbPassword, dbName)
 	}
 
-	f, err := os.OpenFile("auth_service_logfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
+	f, err := os.OpenFile("pay_service_logfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 	if err != nil {
 		log.Fatalln("error opening file: " + err.Error())
 	}
@@ -101,7 +101,7 @@ func main() {
 		}
 	}()
 
-	logg.Info("auth_service is running...")
+	logg.Info("pay_service is running...")
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)

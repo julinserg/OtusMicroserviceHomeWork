@@ -9,6 +9,7 @@ type Config struct {
 	Logger LoggerConf
 	PSQL   PSQLConfig
 	HTTP   HTTPConfig
+	AMQP   AMQPConfig
 }
 
 type LoggerConf struct {
@@ -23,6 +24,17 @@ type PSQLConfig struct {
 type HTTPConfig struct {
 	Host string
 	Port string
+}
+
+type AMQPConfig struct {
+	URI              string
+	Exchange         string
+	ExchangeType     string
+	Key              string
+	Queue            string
+	Consumer         string
+	ExchangeUser     string
+	ExchangeUserType string
 }
 
 func (c *Config) Read(fpath string) error {
