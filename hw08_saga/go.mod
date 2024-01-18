@@ -7,12 +7,11 @@ go 1.16
 require (
 	github.com/BurntSushi/toml v1.2.0
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
-	github.com/gofrs/uuid v4.0.0+incompatible
+	github.com/google/uuid v1.5.0
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.14 // indirect
-	github.com/prometheus/client_golang v1.17.0
 	github.com/rs/zerolog v1.28.0
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/streadway/amqp v1.1.0

@@ -75,7 +75,9 @@ func main() {
 		storage = sqlstor
 	}
 
-	payMQ := pay_amqp.New(logg, storage, config.AMQP.URI)
+	srvPay := pay_app.New(logg, storage)
+
+	payMQ := pay_amqp.New(logg, srvPay, config.AMQP.URI)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)

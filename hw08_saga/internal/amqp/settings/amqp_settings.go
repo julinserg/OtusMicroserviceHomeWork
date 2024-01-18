@@ -7,3 +7,4 @@ const ExchangeStatus = "shop_exchange_status"
 const QueueStatus = "shop_queue_status"
 
 const RoutingKeyPayService = "shop_for_pay_service"
+const RoutingKeyStoreService = "shop_for_store_service"

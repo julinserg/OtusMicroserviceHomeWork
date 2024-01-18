@@ -65,7 +65,10 @@ func (a *SrvOrderAMQP) Start(ctx context.Context) error {
 			return err
 		}
 		a.logger.Info(fmt.Sprintf("receive new message:%+v\n", notifyEvent))
-		a.storage.UpdateOrderStatus(notifyEvent.Id, notifyEvent.Status)
+		err := a.storage.UpdateOrderStatus(notifyEvent.Id, notifyEvent.Status)
+		if err != nil {
+			a.logger.Error(fmt.Sprintf("UpdateOrderStatus error:%s\n", err))
+		}
 	}
 	return nil
 }

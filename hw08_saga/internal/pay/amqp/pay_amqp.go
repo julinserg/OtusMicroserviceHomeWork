@@ -19,22 +19,23 @@ type Logger interface {
 	Warn(msg string)
 }
 
-type Storage interface {
+type SrvPay interface {
+	CreatePaymentOperation(order order_app.Order) error
 }
 
 type SrvPayAMQP struct {
-	logger  Logger
-	storage Storage
-	pub     amqp_pub.AmqpPub
-	uri     string
+	logger Logger
+	srvPay SrvPay
+	pub    amqp_pub.AmqpPub
+	uri    string
 }
 
-func New(logger Logger, storage Storage, uri string) *SrvPayAMQP {
+func New(logger Logger, srvPay SrvPay, uri string) *SrvPayAMQP {
 	return &SrvPayAMQP{
-		logger:  logger,
-		storage: storage,
-		pub:     *amqp_pub.New(logger),
-		uri:     uri,
+		logger: logger,
+		srvPay: srvPay,
+		pub:    *amqp_pub.New(logger),
+		uri:    uri,
 	}
 }
 
@@ -53,12 +54,20 @@ func (a *SrvPayAMQP) Start(ctx context.Context) error {
 	a.logger.Info("start consuming...")
 
 	for m := range msgs {
-		notifyEvent := order_app.Order{}
-		json.Unmarshal(m.Data, &notifyEvent)
+		order := order_app.Order{}
+		json.Unmarshal(m.Data, &order)
 		if err != nil {
 			return err
 		}
-		a.logger.Info(fmt.Sprintf("receive new message:%+v\n", notifyEvent))
+		a.logger.Info(fmt.Sprintf("receive new message:%+v\n", order))
+
+		err := a.srvPay.CreatePaymentOperation(order)
+		if err == nil {
+			a.publishStatus(order.Id, "PAYED")
+			a.publishOrder(order)
+		} else {
+			a.publishStatus(order.Id, "CANCELED")
+		}
 	}
 	return nil
 }
@@ -69,9 +78,23 @@ func (a *SrvPayAMQP) publishOrder(order order_app.Order) error {
 		return err
 	}
 	if err := a.pub.Publish(a.uri, amqp_settings.ExchangeOrder, "direct",
-		amqp_settings.RoutingKeyPayService, string(orderStr), true); err != nil {
+		amqp_settings.RoutingKeyStoreService, string(orderStr), true); err != nil {
 		return err
 	}
 	a.logger.Info("publish order for queue is OK ( OrderId: " + order.Id + ")")
+	return nil
+}
+
+func (a *SrvPayAMQP) publishStatus(idOrder string, statusOrder string) error {
+	orderStatusEvent := order_app.OrderEvent{Id: idOrder, Status: statusOrder}
+	orderStatusStr, err := json.Marshal(orderStatusEvent)
+	if err != nil {
+		return err
+	}
+	if err := a.pub.Publish(a.uri, amqp_settings.ExchangeStatus, "direct",
+		"", string(orderStatusStr), true); err != nil {
+		return err
+	}
+	a.logger.Info("publish order status for queue is OK ( OrderId: " + orderStatusEvent.Id + ")")
 	return nil
 }

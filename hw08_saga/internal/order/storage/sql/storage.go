@@ -60,7 +60,7 @@ func (s *Storage) CreateOrder(order order_app.Order) error {
 }
 
 func (s *Storage) UpdateOrderStatus(idOrder string, status string) error {
-	result, err := s.db.NamedExec(`UPDATE orders SET status=:status, 
+	result, err := s.db.NamedExec(`UPDATE orders SET status=:status 
 	WHERE id = `+`'`+idOrder+`'`,
 		map[string]interface{}{
 			"status": status,
