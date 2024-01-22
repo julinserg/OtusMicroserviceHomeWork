@@ -10,7 +10,8 @@ import (
 
 type SrvOrder interface {
 	CreateOrder(user order_app.Order) error
-	GetOrdersCount() (int, error)
+	CancelOrder(id string) error
+	StatusOrder(id string) (string, error)
 }
 
 type Server struct {
@@ -47,7 +48,8 @@ func NewServer(logger Logger, srvOrder SrvOrder, endpoint string) *Server {
 	uh := ordersHandler{logger: logger, srvOrder: srvOrder}
 	mux.HandleFunc("/api/v1/orders/health", hellowHandler)
 	mux.HandleFunc("/api/v1/orders/create", uh.createHandler)
-	mux.HandleFunc("/api/v1/orders/count", uh.countHandler)
+	mux.HandleFunc("/api/v1/orders/cancel", uh.cancelHandler)
+	mux.HandleFunc("/api/v1/orders/status", uh.statusHandler)
 	return &Server{server, logger, endpoint}
 }
 

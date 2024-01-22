@@ -21,6 +21,7 @@ type Logger interface {
 
 type SrvPay interface {
 	CreatePaymentOperation(order order_app.Order) error
+	RevertPaymentOperation(idOrder string, statusOrder string) error
 }
 
 type SrvPayAMQP struct {
@@ -30,28 +31,31 @@ type SrvPayAMQP struct {
 	uri    string
 }
 
-func New(logger Logger, srvPay SrvPay, uri string) *SrvPayAMQP {
+func New(logger Logger, uri string) *SrvPayAMQP {
 	return &SrvPayAMQP{
 		logger: logger,
-		srvPay: srvPay,
 		pub:    *amqp_pub.New(logger),
 		uri:    uri,
 	}
 }
 
-func (a *SrvPayAMQP) Start(ctx context.Context) error {
+func (a *SrvPayAMQP) SetService(srvPay SrvPay) {
+	a.srvPay = srvPay
+}
+
+func (a *SrvPayAMQP) StartReceiveOrder(ctx context.Context) error {
 	conn, err := amqp.Dial(a.uri)
 	if err != nil {
 		return err
 	}
-	c := amqp_sub.New("SrvPayAMQP", conn, a.logger)
+	c := amqp_sub.New("SrvPayAMQPOrder", conn, a.logger)
 	msgs, err := c.Consume(ctx, amqp_settings.QueueOrder, amqp_settings.ExchangeOrder,
 		"direct", amqp_settings.RoutingKeyPayService)
 	if err != nil {
 		return err
 	}
 
-	a.logger.Info("start consuming...")
+	a.logger.Info("start consuming order...")
 
 	for m := range msgs {
 		order := order_app.Order{}
@@ -62,17 +66,42 @@ func (a *SrvPayAMQP) Start(ctx context.Context) error {
 		a.logger.Info(fmt.Sprintf("receive new message:%+v\n", order))
 
 		err := a.srvPay.CreatePaymentOperation(order)
-		if err == nil {
-			a.publishStatus(order.Id, "PAYED")
-			a.publishOrder(order)
-		} else {
-			a.publishStatus(order.Id, "CANCELED")
+		if err != nil {
+			a.logger.Warn("Error CreatePaymentOperation: " + err.Error())
 		}
 	}
 	return nil
 }
 
-func (a *SrvPayAMQP) publishOrder(order order_app.Order) error {
+func (a *SrvPayAMQP) StartReceiveStatus(ctx context.Context) error {
+	conn, err := amqp.Dial(a.uri)
+	if err != nil {
+		return err
+	}
+	c := amqp_sub.New("SrvPayAMQPStatus", conn, a.logger)
+	msgs, err := c.Consume(ctx, amqp_settings.QueueStatusPayService, amqp_settings.ExchangeStatus, "direct", "")
+	if err != nil {
+		return err
+	}
+
+	a.logger.Info("start consuming status...")
+
+	for m := range msgs {
+		notifyEvent := order_app.OrderEvent{}
+		json.Unmarshal(m.Data, &notifyEvent)
+		if err != nil {
+			return err
+		}
+		a.logger.Info(fmt.Sprintf("receive new order status update event:%+v\n", notifyEvent))
+		err := a.srvPay.RevertPaymentOperation(notifyEvent.Id, notifyEvent.Status)
+		if err != nil {
+			a.logger.Warn("Error RevertPaymentOperation: " + err.Error())
+		}
+	}
+	return nil
+}
+
+func (a *SrvPayAMQP) PublishOrder(order order_app.Order) error {
 	orderStr, err := json.Marshal(order)
 	if err != nil {
 		return err
@@ -85,7 +114,7 @@ func (a *SrvPayAMQP) publishOrder(order order_app.Order) error {
 	return nil
 }
 
-func (a *SrvPayAMQP) publishStatus(idOrder string, statusOrder string) error {
+func (a *SrvPayAMQP) PublishStatus(idOrder string, statusOrder string) error {
 	orderStatusEvent := order_app.OrderEvent{Id: idOrder, Status: statusOrder}
 	orderStatusStr, err := json.Marshal(orderStatusEvent)
 	if err != nil {

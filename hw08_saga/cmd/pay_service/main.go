@@ -75,9 +75,11 @@ func main() {
 		storage = sqlstor
 	}
 
-	srvPay := pay_app.New(logg, storage)
+	payMQ := pay_amqp.New(logg, config.AMQP.URI)
 
-	payMQ := pay_amqp.New(logg, srvPay, config.AMQP.URI)
+	srvPay := pay_app.New(logg, storage, payMQ)
+
+	payMQ.SetService(srvPay)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -86,11 +88,19 @@ func main() {
 	logg.Info("pay_service is running...")
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		if err := payMQ.Start(ctx); err != nil {
-			logg.Error("failed to start MQ worker: " + err.Error())
+		if err := payMQ.StartReceiveOrder(ctx); err != nil {
+			logg.Error("failed to start MQ worker(order): " + err.Error())
+			cancel()
+			return
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		if err := payMQ.StartReceiveStatus(ctx); err != nil {
+			logg.Error("failed to start MQ worker(status): " + err.Error())
 			cancel()
 			return
 		}

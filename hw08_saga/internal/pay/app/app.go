@@ -12,11 +12,11 @@ var (
 )
 
 type PayOperation struct {
-	Id         string
-	IdOrder    string
-	CardParams string
-	Amount     int
-	Operation  string // "DEBIT"/"CREDIT"
+	Id         string `db:"id"`
+	IdOrder    string `db:"id_order"`
+	CardParams string `db:"card_params"`
+	Amount     int    `db:"amount"`
+	Operation  string `db:"operation"` // "DEBIT"/"CREDIT"
 }
 
 type Logger interface {
@@ -29,15 +29,22 @@ type Logger interface {
 type Storage interface {
 	CreateSchema() error
 	CreatePaymentOperation(payment PayOperation) error
+	GetPaymentOperation(idOrder string) (PayOperation, error)
+}
+
+type PayMQ interface {
+	PublishOrder(order order_app.Order) error
+	PublishStatus(idOrder string, statusOrder string) error
 }
 
 type SrvPay struct {
 	logger  Logger
 	storage Storage
+	mq      PayMQ
 }
 
-func New(logger Logger, storage Storage) *SrvPay {
-	return &SrvPay{logger, storage}
+func New(logger Logger, storage Storage, mq PayMQ) *SrvPay {
+	return &SrvPay{logger, storage, mq}
 }
 
 func (s *SrvPay) CreatePaymentOperation(order order_app.Order) error {
@@ -55,5 +62,30 @@ func (s *SrvPay) CreatePaymentOperation(order order_app.Order) error {
 		CardParams: order.CardParams,
 		Amount:     sum,
 		Operation:  "DEBIT"}
-	return s.storage.CreatePaymentOperation(paymentOperation)
+
+	err := s.storage.CreatePaymentOperation(paymentOperation)
+	if err == nil {
+		s.mq.PublishStatus(order.Id, "PAYED")
+		s.mq.PublishOrder(order)
+	} else {
+		s.mq.PublishStatus(order.Id, "CANCELED")
+	}
+	return err
+}
+
+func (s *SrvPay) RevertPaymentOperation(idOrder string, statusOrder string) error {
+	if statusOrder != "CANCELED" {
+		return nil
+	}
+	operation, err := s.storage.GetPaymentOperation(idOrder)
+	if err != nil {
+		return err
+	}
+	operation.Id = uuid.New().String()
+	operation.Operation = "CREDIT"
+	err = s.storage.CreatePaymentOperation(operation)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	order_app "github.com/julinserg/julinserg/OtusMicroserviceHomeWork/hw08_saga/internal/order/app"
 )
@@ -31,10 +30,17 @@ func (h *ordersHandler) createHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *ordersHandler) countHandler(w http.ResponseWriter, r *http.Request) {
+func (h *ordersHandler) cancelHandler(w http.ResponseWriter, r *http.Request) {
+	switch method := r.Method; method {
+	case "POST":
+		h.CancelOrder(w, r)
+	}
+}
+
+func (h *ordersHandler) statusHandler(w http.ResponseWriter, r *http.Request) {
 	switch method := r.Method; method {
 	case "GET":
-		h.CountOrder(w, r)
+		h.StatusOrder(w, r)
 	}
 }
 
@@ -84,13 +90,34 @@ func (h *ordersHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (h *ordersHandler) CountOrder(w http.ResponseWriter, r *http.Request) {
-	result, err := h.srvOrder.GetOrdersCount()
+func (h *ordersHandler) CancelOrder(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if !h.checkErrorAndSendResponse(err, http.StatusBadRequest, w) {
+		return
+	}
+
+	orderID := &order_app.OrderID{}
+	err = json.Unmarshal(body, orderID)
+	if !h.checkErrorAndSendResponse(err, http.StatusBadRequest, w) {
+		return
+	}
+	err = h.srvOrder.CancelOrder(orderID.Id)
 	if !h.checkErrorAndSendResponse(err, http.StatusInternalServerError, w) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("{ \"count\" :" + strconv.Itoa(result) + "}"))
+	return
+}
+
+func (h *ordersHandler) StatusOrder(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	status, err := h.srvOrder.StatusOrder(id)
+	if !h.checkErrorAndSendResponse(err, http.StatusInternalServerError, w) {
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{ \"status\" :" + status + "}"))
 	return
 }

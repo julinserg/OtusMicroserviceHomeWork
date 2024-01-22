@@ -24,11 +24,15 @@ type Product struct {
 }
 
 type Order struct {
-	Id         string    `json:"id,omitempty"`
-	Products   []Product `json:"products"`
-	ShippingTo string    `json:"shipping_to"`
-	CardParams string    `json:"card_params"`
-	Status     string    `json:"status"` // "CREATED"/"CANCELED"/"COMPLETED"/"PAYED"/"RESERVED"/"DELIVERED"
+	Id         string    `json:"id,omitempty" db:"id"`
+	Products   []Product `json:"products" db:"products"`
+	ShippingTo string    `json:"shipping_to" db:"shipping_to"`
+	CardParams string    `json:"card_params" db:"card_params"`
+	Status     string    `json:"status" db:"status"` // "CREATED"/"CANCELED"/"COMPLETED"/"PAYED"/"RESERVED"/"DELIVERED"
+}
+
+type OrderID struct {
+	Id string `json:"id,omitempty"`
 }
 
 type OrderEvent struct {
@@ -40,7 +44,7 @@ type Storage interface {
 	CreateSchema() error
 	CreateOrder(order Order) error
 	UpdateOrderStatus(idOrder string, status string) error
-	GetOrdersCount() (int, error)
+	GetOrder(id string) (Order, error)
 }
 
 type Logger interface {
@@ -51,7 +55,8 @@ type Logger interface {
 }
 
 type OrderMQ interface {
-	Publish(order Order) error
+	PublishOrder(order Order) error
+	PublishStatus(idOrder string, statusOrder string) error
 }
 
 type SrvOrder struct {
@@ -70,9 +75,17 @@ func (a *SrvOrder) CreateOrder(order Order) error {
 	if err != nil {
 		return err
 	}
-	return a.mq.Publish(order)
+	return a.mq.PublishOrder(order)
 }
 
-func (a *SrvOrder) GetOrdersCount() (int, error) {
-	return a.storage.GetOrdersCount()
+func (a *SrvOrder) CancelOrder(id string) error {
+	return a.mq.PublishStatus(id, "CANCELED")
+}
+
+func (a *SrvOrder) StatusOrder(id string) (string, error) {
+	order, err := a.storage.GetOrder(id)
+	if err != nil {
+		return "", err
+	}
+	return order.Status, nil
 }

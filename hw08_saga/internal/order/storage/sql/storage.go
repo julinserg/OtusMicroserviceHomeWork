@@ -59,6 +59,25 @@ func (s *Storage) CreateOrder(order order_app.Order) error {
 	return err
 }
 
+func (s *Storage) GetOrder(id string) (order_app.Order, error) {
+	order := order_app.Order{}
+	rows, err := s.db.NamedQuery(`SELECT id,products,shipping_to,card_params,status FROM orders WHERE id = :id`,
+		map[string]interface{}{
+			"id": id,
+		})
+	if err != nil {
+		return order, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.StructScan(&order)
+		if err != nil {
+			return order, err
+		}
+	}
+	return order, nil
+}
+
 func (s *Storage) UpdateOrderStatus(idOrder string, status string) error {
 	result, err := s.db.NamedExec(`UPDATE orders SET status=:status 
 	WHERE id = `+`'`+idOrder+`'`,
@@ -72,21 +91,4 @@ func (s *Storage) UpdateOrderStatus(idOrder string, status string) error {
 		}
 	}
 	return err
-}
-
-func (s *Storage) GetOrdersCount() (int, error) {
-	result := 0
-	rows, err := s.db.Query(`SELECT COUNT(*) FROM orders`)
-	if err != nil {
-		return result, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		err := rows.Scan(&result)
-		if err != nil {
-			return result, err
-		}
-	}
-	return result, nil
 }

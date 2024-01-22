@@ -50,3 +50,22 @@ func (s *Storage) CreatePaymentOperation(payment pay_app.PayOperation) error {
 		})
 	return err
 }
+
+func (s *Storage) GetPaymentOperation(idOrder string) (pay_app.PayOperation, error) {
+	operation := pay_app.PayOperation{}
+	rows, err := s.db.NamedQuery(`SELECT id,id_order,card_params,amount,operation FROM pay WHERE id_order=:id_order`,
+		map[string]interface{}{
+			"id_order": idOrder,
+		})
+	if err != nil {
+		return operation, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.StructScan(&operation)
+		if err != nil {
+			return operation, err
+		}
+	}
+	return operation, nil
+}

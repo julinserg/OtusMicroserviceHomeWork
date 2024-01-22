@@ -46,7 +46,7 @@ func (a *SrvOrderAMQP) Start(ctx context.Context) error {
 	}
 
 	c := amqp_sub.New("SrvOrderAMQP", conn, a.logger)
-	msgs, err := c.Consume(ctx, amqp_settings.QueueStatus, amqp_settings.ExchangeStatus, "direct", "")
+	msgs, err := c.Consume(ctx, amqp_settings.QueueStatusOrderService, amqp_settings.ExchangeStatus, "direct", "")
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func (a *SrvOrderAMQP) Start(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		a.logger.Info(fmt.Sprintf("receive new message:%+v\n", notifyEvent))
+		a.logger.Info(fmt.Sprintf("receive new order status update event:%+v\n", notifyEvent))
 		err := a.storage.UpdateOrderStatus(notifyEvent.Id, notifyEvent.Status)
 		if err != nil {
 			a.logger.Error(fmt.Sprintf("UpdateOrderStatus error:%s\n", err))
@@ -73,7 +73,7 @@ func (a *SrvOrderAMQP) Start(ctx context.Context) error {
 	return nil
 }
 
-func (a *SrvOrderAMQP) Publish(order order_app.Order) error {
+func (a *SrvOrderAMQP) PublishOrder(order order_app.Order) error {
 	orderStr, err := json.Marshal(order)
 	if err != nil {
 		return err
@@ -83,5 +83,19 @@ func (a *SrvOrderAMQP) Publish(order order_app.Order) error {
 		return err
 	}
 	a.logger.Info("publish order for queue is OK ( OrderId: " + order.Id + ")")
+	return nil
+}
+
+func (a *SrvOrderAMQP) PublishStatus(idOrder string, statusOrder string) error {
+	orderStatusEvent := order_app.OrderEvent{Id: idOrder, Status: statusOrder}
+	orderStatusStr, err := json.Marshal(orderStatusEvent)
+	if err != nil {
+		return err
+	}
+	if err := a.pub.Publish(a.uri, amqp_settings.ExchangeStatus, "direct",
+		"", string(orderStatusStr), true); err != nil {
+		return err
+	}
+	a.logger.Info("publish order status for queue is OK ( OrderId: " + orderStatusEvent.Id + ")")
 	return nil
 }
