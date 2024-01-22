@@ -1,6 +1,8 @@
 package order_app
 
 import (
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
 )
 
@@ -23,12 +25,27 @@ type Product struct {
 	Price int    `json:"price" db:"price"`
 }
 
+type Products []Product
+
+func (a Products) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+func (a *Products) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
+}
+
 type Order struct {
-	Id         string    `json:"id,omitempty" db:"id"`
-	Products   []Product `json:"products" db:"products"`
-	ShippingTo string    `json:"shipping_to" db:"shipping_to"`
-	CardParams string    `json:"card_params" db:"card_params"`
-	Status     string    `json:"status" db:"status"` // "CREATED"/"CANCELED"/"COMPLETED"/"PAYED"/"RESERVED"/"DELIVERED"
+	Id         string   `json:"id,omitempty" db:"id"`
+	Products   Products `json:"products" db:"products"`
+	ShippingTo string   `json:"shipping_to" db:"shipping_to"`
+	CardParams string   `json:"card_params" db:"card_params"`
+	Status     string   `json:"status" db:"status"` // "CREATED"/"CANCELED"/"COMPLETED"/"PAYED"/"RESERVED"/"DELIVERED"
 }
 
 type OrderID struct {
