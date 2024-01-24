@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	// Register pgx driver for postgresql.
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -32,6 +33,11 @@ func (s *Storage) CreateSchema() error {
 	var err error
 	_, err = s.db.Query(`CREATE TABLE IF NOT EXISTS orders (id text primary key, products jsonb,
 		 shipping_to text, card_params text, status text);`)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Query(`CREATE TABLE IF NOT EXISTS history_status_change (time timestamptz primary key,
+		id_order text, status text);`)
 	return err
 }
 
@@ -55,6 +61,16 @@ func (s *Storage) CreateOrder(order order_app.Order) error {
 			"shipping_to": order.ShippingTo,
 			"card_params": order.CardParams,
 			"status":      order.Status,
+		})
+	if err != nil {
+		return err
+	}
+	_, err = s.db.NamedExec(`INSERT INTO history_status_change (time, id_order, status)
+		 VALUES (:time,:id_order,:status)`,
+		map[string]interface{}{
+			"time":     time.Now(),
+			"id_order": order.Id,
+			"status":   order.Status,
 		})
 	return err
 }
@@ -90,5 +106,33 @@ func (s *Storage) UpdateOrderStatus(idOrder string, status string) error {
 			return order_app.ErrOrderIDNotExist
 		}
 	}
+	_, err = s.db.NamedExec(`INSERT INTO history_status_change (time, id_order, status)
+		 VALUES (:time,:id_order,:status)`,
+		map[string]interface{}{
+			"time":     time.Now(),
+			"id_order": idOrder,
+			"status":   status,
+		})
 	return err
+}
+
+func (s *Storage) GetListStatus(idOrder string) ([]order_app.OrderStatus, error) {
+	orderStatus := make([]order_app.OrderStatus, 0)
+	rows, err := s.db.NamedQuery(`SELECT time,id_order,status FROM history_status_change WHERE id_order = :id_order ORDER BY time`,
+		map[string]interface{}{
+			"id_order": idOrder,
+		})
+	if err != nil {
+		return orderStatus, err
+	}
+	defer rows.Close()
+	st := order_app.OrderStatus{}
+	for rows.Next() {
+		err := rows.StructScan(&st)
+		if err != nil {
+			return orderStatus, err
+		}
+		orderStatus = append(orderStatus, st)
+	}
+	return orderStatus, nil
 }

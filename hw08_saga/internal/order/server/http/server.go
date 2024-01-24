@@ -12,6 +12,7 @@ type SrvOrder interface {
 	CreateOrder(user order_app.Order) error
 	CancelOrder(id string) error
 	StatusOrder(id string) (string, error)
+	StatusOrderChangeList(id string) ([]string, error)
 }
 
 type Server struct {
@@ -50,6 +51,7 @@ func NewServer(logger Logger, srvOrder SrvOrder, endpoint string) *Server {
 	mux.HandleFunc("/api/v1/orders/create", uh.createHandler)
 	mux.HandleFunc("/api/v1/orders/cancel", uh.cancelHandler)
 	mux.HandleFunc("/api/v1/orders/status", uh.statusHandler)
+	mux.HandleFunc("/api/v1/orders/status_change_list", uh.statusChangeListHandler)
 	return &Server{server, logger, endpoint}
 }
 

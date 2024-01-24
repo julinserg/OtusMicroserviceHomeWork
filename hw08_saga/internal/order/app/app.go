@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 var (
@@ -48,6 +49,12 @@ type Order struct {
 	Status     string   `json:"status" db:"status"` // "CREATED"/"CANCELED"/"COMPLETED"/"PAYED"/"RESERVED"/"DELIVERED"
 }
 
+type OrderStatus struct {
+	Time    time.Time `json:"time,omitempty" db:"time"`
+	IdOrder string    `json:"id_order" db:"id_order"`
+	Status  string    `json:"status" db:"status"`
+}
+
 type OrderID struct {
 	Id string `json:"id,omitempty"`
 }
@@ -62,6 +69,7 @@ type Storage interface {
 	CreateOrder(order Order) error
 	UpdateOrderStatus(idOrder string, status string) error
 	GetOrder(id string) (Order, error)
+	GetListStatus(idOrder string) ([]OrderStatus, error)
 }
 
 type Logger interface {
@@ -105,4 +113,16 @@ func (a *SrvOrder) StatusOrder(id string) (string, error) {
 		return "", err
 	}
 	return order.Status, nil
+}
+
+func (a *SrvOrder) StatusOrderChangeList(id string) ([]string, error) {
+	statusList, err := a.storage.GetListStatus(id)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, len(statusList))
+	for i := 0; i < len(statusList); i++ {
+		result[i] = statusList[i].Status
+	}
+	return result, nil
 }

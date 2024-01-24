@@ -44,6 +44,13 @@ func (h *ordersHandler) statusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *ordersHandler) statusChangeListHandler(w http.ResponseWriter, r *http.Request) {
+	switch method := r.Method; method {
+	case "GET":
+		h.StatusOrderChangeList(w, r)
+	}
+}
+
 func (h *ordersHandler) WriteResponseError(w http.ResponseWriter, resp *ResponseError) {
 	resBuf, err := json.Marshal(resp)
 	if err != nil {
@@ -119,5 +126,18 @@ func (h *ordersHandler) StatusOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{ \"status\" :\"" + status + "\"}"))
+	return
+}
+
+func (h *ordersHandler) StatusOrderChangeList(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	statusList, err := h.srvOrder.StatusOrderChangeList(id)
+	if !h.checkErrorAndSendResponse(err, http.StatusInternalServerError, w) {
+		return
+	}
+	j, err := json.Marshal(statusList)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{ \"status_list\" :" + string(j) + "}"))
 	return
 }
