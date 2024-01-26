@@ -49,7 +49,7 @@ func (a *SrvStockAMQP) StartReceiveOrder(ctx context.Context) error {
 		return err
 	}
 	c := amqp_sub.New("SrvStockAMQPOrder", conn, a.logger)
-	msgs, err := c.Consume(ctx, amqp_settings.QueueOrder, amqp_settings.ExchangeOrder,
+	msgs, err := c.Consume(ctx, amqp_settings.QueueOrderStockService, amqp_settings.ExchangeOrder,
 		"direct", amqp_settings.RoutingKeyStockService)
 	if err != nil {
 		return err

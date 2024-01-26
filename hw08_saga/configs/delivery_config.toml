@@ -1,0 +1,8 @@
+[logger]
+level = "INFO"
+
+[psql]
+dsn = "host=localhost port=5432 user=sergey password=sergey dbname=shop sslmode=disable"
+
+[amqp]
+uri = "amqp://guest:guest@localhost:5672/"

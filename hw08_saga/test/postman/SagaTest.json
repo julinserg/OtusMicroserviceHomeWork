@@ -34,7 +34,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n \"id\": \"ba2e666b-4bb5-452e-9c72-5349b2b52552\",\n \"products\": [{\"id\": 42, \"price\": 2500}],\n \"shipping_to\": \"Большая филёвская 16к1, кв. 14\",\n \"card_params\": \"1234 5678 7890 1234; 765; Ivan Ivanov\"\n}",
+					"raw": "{\n \"id\": \"ba2e666b-4bb5-452e-9c72-5349b2b52552\",\n \"products\": [{\"id\": 42, \"price\": 2500, \"count\": 1}],\n \"shipping_to\": \"Большая филёвская 16к1, кв. 14\",\n \"card_params\": \"1234 5678 7890 1234; 765; Ivan Ivanov\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -56,7 +56,7 @@
 							"pm.test(\"Successful POST request\", function () {",
 							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.status).to.eql(\"PAYED\");",
+							"    pm.expect(jsonData.status_list).to.eql([\"CREATED\",\"PAYED\", \"RESERVED\", \"DELIVERED\"]);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -67,7 +67,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/v1/orders/status?id=ba2e666b-4bb5-452e-9c72-5349b2b52552",
+					"raw": "{{base_url}}/api/v1/orders/status_change_list?id=ba2e666b-4bb5-452e-9c72-5349b2b52552",
 					"host": [
 						"{{base_url}}"
 					],
@@ -75,7 +75,7 @@
 						"api",
 						"v1",
 						"orders",
-						"status"
+						"status_change_list"
 					],
 					"query": [
 						{
@@ -136,7 +136,7 @@
 							"pm.test(\"Successful POST request\", function () {",
 							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.status).to.eql(\"CANCELED\");",
+							"    pm.expect(jsonData.status_list).to.eql([\"CREATED\",\"PAYED\", \"RESERVED\",\"DELIVERED\",\"CANCELED\"]);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -147,7 +147,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/v1/orders/status?id=ba2e666b-4bb5-452e-9c72-5349b2b52552",
+					"raw": "{{base_url}}/api/v1/orders/status_change_list?id=ba2e666b-4bb5-452e-9c72-5349b2b52552",
 					"host": [
 						"{{base_url}}"
 					],
@@ -155,7 +155,7 @@
 						"api",
 						"v1",
 						"orders",
-						"status"
+						"status_change_list"
 					],
 					"query": [
 						{
@@ -194,7 +194,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n \"id\": \"57c7e0e6-ad54-45ca-a9d9-d56dfcbe9f11\",\n \"products\": [{\"id\": 42, \"price\": 0}],\n \"shipping_to\": \"Большая филёвская 16к1, кв. 14\",\n \"card_params\": \"1234 5678 7890 1234; 765; Ivan Ivanov\"\n}",
+					"raw": "{\n \"id\": \"57c7e0e6-ad54-45ca-a9d9-d56dfcbe9f11\",\n \"products\": [{\"id\": 42, \"price\": 0, \"count\": 1}],\n \"shipping_to\": \"Большая филёвская 16к1, кв. 14\",\n \"card_params\": \"1234 5678 7890 1234; 765; Ivan Ivanov\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -216,7 +216,7 @@
 							"pm.test(\"Successful POST request\", function () {",
 							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.status).to.eql(\"CANCELED\");",
+							"     pm.expect(jsonData.status_list).to.eql([\"CREATED\",\"CANCELED\"]);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -227,7 +227,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/v1/orders/status?id=57c7e0e6-ad54-45ca-a9d9-d56dfcbe9f11",
+					"raw": "{{base_url}}/api/v1/orders/status_change_list?id=57c7e0e6-ad54-45ca-a9d9-d56dfcbe9f11",
 					"host": [
 						"{{base_url}}"
 					],
@@ -235,12 +235,172 @@
 						"api",
 						"v1",
 						"orders",
-						"status"
+						"status_change_list"
 					],
 					"query": [
 						{
 							"key": "id",
 							"value": "57c7e0e6-ad54-45ca-a9d9-d56dfcbe9f11"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateOrderFailReserved",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json; charset=UTF-8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"id\": \"21bd960a-d7bc-4fb1-b585-b3ca4c449e08\",\n \"products\": [{\"id\": 42, \"price\": 2500, \"count\": 0}],\n \"shipping_to\": \"Большая филёвская 16к1, кв. 14\",\n \"card_params\": \"1234 5678 7890 1234; 765; Ivan Ivanov\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{base_url}}/api/v1/orders/create",
+				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+			},
+			"response": []
+		},
+		{
+			"name": "GetOrderFailReservedStatusCancel",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"    var jsonData = pm.response.json();",
+							"     pm.expect(jsonData.status_list).to.eql([\"CREATED\", \"PAYED\", \"CANCELED\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/v1/orders/status_change_list?id=21bd960a-d7bc-4fb1-b585-b3ca4c449e08",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orders",
+						"status_change_list"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "21bd960a-d7bc-4fb1-b585-b3ca4c449e08"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateOrderFailDelivered",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json; charset=UTF-8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"id\": \"671ce8f7-ed40-4b96-be78-910f14444a2f\",\n \"products\": [{\"id\": 42, \"price\": 2500, \"count\": 1}],\n \"shipping_to\": \"\",\n \"card_params\": \"1234 5678 7890 1234; 765; Ivan Ivanov\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{base_url}}/api/v1/orders/create",
+				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+			},
+			"response": []
+		},
+		{
+			"name": "GetOrderFailDeliveredStatusCancel",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"    var jsonData = pm.response.json();",
+							"     pm.expect(jsonData.status_list).to.eql([\"CREATED\", \"PAYED\", \"RESERVED\",\"CANCELED\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/v1/orders/status_change_list?id=671ce8f7-ed40-4b96-be78-910f14444a2f",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orders",
+						"status_change_list"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "671ce8f7-ed40-4b96-be78-910f14444a2f"
 						}
 					]
 				}

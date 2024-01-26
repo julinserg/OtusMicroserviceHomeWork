@@ -1,4 +1,4 @@
-package pay_amqp
+package delivery_amqp
 
 import (
 	"context"
@@ -19,38 +19,38 @@ type Logger interface {
 	Warn(msg string)
 }
 
-type SrvPay interface {
-	CreatePaymentOperation(order order_app.Order) error
-	RevertPaymentOperation(idOrder string, statusOrder string) error
+type SrvDelivery interface {
+	CreateDeliveryOperation(order order_app.Order) error
+	RevertDeliveryOperation(idOrder string, statusOrder string) error
 }
 
-type SrvPayAMQP struct {
-	logger Logger
-	srvPay SrvPay
-	pub    amqp_pub.AmqpPub
-	uri    string
+type SrvDeliveryAMQP struct {
+	logger      Logger
+	srvDelivery SrvDelivery
+	pub         amqp_pub.AmqpPub
+	uri         string
 }
 
-func New(logger Logger, uri string) *SrvPayAMQP {
-	return &SrvPayAMQP{
+func New(logger Logger, uri string) *SrvDeliveryAMQP {
+	return &SrvDeliveryAMQP{
 		logger: logger,
 		pub:    *amqp_pub.New(logger),
 		uri:    uri,
 	}
 }
 
-func (a *SrvPayAMQP) SetService(srvPay SrvPay) {
-	a.srvPay = srvPay
+func (a *SrvDeliveryAMQP) SetService(srvDelivery SrvDelivery) {
+	a.srvDelivery = srvDelivery
 }
 
-func (a *SrvPayAMQP) StartReceiveOrder(ctx context.Context) error {
+func (a *SrvDeliveryAMQP) StartReceiveOrder(ctx context.Context) error {
 	conn, err := amqp.Dial(a.uri)
 	if err != nil {
 		return err
 	}
-	c := amqp_sub.New("SrvPayAMQPOrder", conn, a.logger)
-	msgs, err := c.Consume(ctx, amqp_settings.QueueOrderPayService, amqp_settings.ExchangeOrder,
-		"direct", amqp_settings.RoutingKeyPayService)
+	c := amqp_sub.New("SrvDeliveryAMQPOrder", conn, a.logger)
+	msgs, err := c.Consume(ctx, amqp_settings.QueueOrderDeliveryService, amqp_settings.ExchangeOrder,
+		"direct", amqp_settings.RoutingKeyDeliveryService)
 	if err != nil {
 		return err
 	}
@@ -65,21 +65,21 @@ func (a *SrvPayAMQP) StartReceiveOrder(ctx context.Context) error {
 		}
 		a.logger.Info(fmt.Sprintf("receive new message:%+v\n", order))
 
-		err := a.srvPay.CreatePaymentOperation(order)
+		err := a.srvDelivery.CreateDeliveryOperation(order)
 		if err != nil {
-			a.logger.Warn("Error CreatePaymentOperation: " + err.Error())
+			a.logger.Warn("Error CreateDeliveryOperation: " + err.Error())
 		}
 	}
 	return nil
 }
 
-func (a *SrvPayAMQP) StartReceiveStatus(ctx context.Context) error {
+func (a *SrvDeliveryAMQP) StartReceiveStatus(ctx context.Context) error {
 	conn, err := amqp.Dial(a.uri)
 	if err != nil {
 		return err
 	}
-	c := amqp_sub.New("SrvPayAMQPStatus", conn, a.logger)
-	msgs, err := c.Consume(ctx, amqp_settings.QueueStatusPayService, amqp_settings.ExchangeStatus, "direct", "")
+	c := amqp_sub.New("SrvDeliveryAMQPStatus", conn, a.logger)
+	msgs, err := c.Consume(ctx, amqp_settings.QueueStatusDeliveryService, amqp_settings.ExchangeStatus, "direct", "")
 	if err != nil {
 		return err
 	}
@@ -93,28 +93,15 @@ func (a *SrvPayAMQP) StartReceiveStatus(ctx context.Context) error {
 			return err
 		}
 		a.logger.Info(fmt.Sprintf("receive new order status update event:%+v\n", notifyEvent))
-		err := a.srvPay.RevertPaymentOperation(notifyEvent.Id, notifyEvent.Status)
+		err := a.srvDelivery.RevertDeliveryOperation(notifyEvent.Id, notifyEvent.Status)
 		if err != nil {
-			a.logger.Warn("Error RevertPaymentOperation: " + err.Error())
+			a.logger.Warn("Error RevertDeliveryOperation: " + err.Error())
 		}
 	}
 	return nil
 }
 
-func (a *SrvPayAMQP) PublishOrder(order order_app.Order) error {
-	orderStr, err := json.Marshal(order)
-	if err != nil {
-		return err
-	}
-	if err := a.pub.Publish(a.uri, amqp_settings.ExchangeOrder, "direct",
-		amqp_settings.RoutingKeyStockService, string(orderStr), true); err != nil {
-		return err
-	}
-	a.logger.Info("publish order for queue is OK ( OrderId: " + order.Id + ")")
-	return nil
-}
-
-func (a *SrvPayAMQP) PublishStatus(idOrder string, statusOrder string) error {
+func (a *SrvDeliveryAMQP) PublishStatus(idOrder string, statusOrder string) error {
 	orderStatusEvent := order_app.OrderEvent{Id: idOrder, Status: statusOrder}
 	orderStatusStr, err := json.Marshal(orderStatusEvent)
 	if err != nil {
