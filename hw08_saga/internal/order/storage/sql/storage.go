@@ -32,7 +32,7 @@ func (s *Storage) Connect(ctx context.Context, dsn string) error {
 func (s *Storage) CreateSchema() error {
 	var err error
 	_, err = s.db.Query(`CREATE TABLE IF NOT EXISTS orders (id text primary key, products jsonb,
-		 shipping_to text, card_params text, status text);`)
+		 shipping_to text, card_params text, status text, time timestamptz);`)
 	if err != nil {
 		return err
 	}
@@ -53,14 +53,15 @@ func (s *Storage) CreateOrder(order order_app.Order) error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.NamedExec(`INSERT INTO orders (id, products, shipping_to, card_params, status)
-		 VALUES (:id,:products,:shipping_to,:card_params,:status)`,
+	_, err = s.db.NamedExec(`INSERT INTO orders (id, products, shipping_to, card_params, status, time)
+		 VALUES (:id,:products,:shipping_to,:card_params,:status, :time)`,
 		map[string]interface{}{
 			"id":          order.Id,
 			"products":    string(productsStr),
 			"shipping_to": order.ShippingTo,
 			"card_params": order.CardParams,
 			"status":      order.Status,
+			"time":        time.Now(),
 		})
 	if err != nil {
 		return err

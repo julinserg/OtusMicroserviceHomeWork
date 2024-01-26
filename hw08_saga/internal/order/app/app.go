@@ -24,6 +24,7 @@ type Product struct {
 	Id    int64  `json:"id" db:"id"`
 	Name  string `json:"name,omitempty" db:"name"`
 	Price int    `json:"price" db:"price"`
+	Count int    `json:"count" db:"count"`
 }
 
 type Products []Product
