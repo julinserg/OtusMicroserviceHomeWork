@@ -70,6 +70,15 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, pm.collectionVariables.get(\"timeoutGet\")); "
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -147,6 +156,15 @@
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData.status_list).to.eql([\"CREATED\",\"PAYED\", \"RESERVED\",\"DELIVERED\",\"CANCELED\"]);",
 							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, pm.collectionVariables.get(\"timeoutGet\")); "
 						],
 						"type": "text/javascript"
 					}
@@ -239,6 +257,15 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, pm.collectionVariables.get(\"timeoutGet\")); "
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -328,6 +355,15 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, pm.collectionVariables.get(\"timeoutGet\")); "
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -409,11 +445,20 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Successful POST request\", function () {",
+							"pm.test(\"Successful POST request\", function () {      ",
 							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
 							"    var jsonData = pm.response.json();",
 							"     pm.expect(jsonData.status_list).to.eql([\"CREATED\", \"PAYED\", \"RESERVED\",\"CANCELED\"]);",
 							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"setTimeout(() => {}, pm.collectionVariables.get(\"timeoutGet\")); "
 						],
 						"type": "text/javascript"
 					}
@@ -423,7 +468,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/v1/orders/status_change_list?id=671ce8f7-ed40-4b96-be78-910f14444a2f",
+					"raw": "{{base_url}}/api/v1/orders/status_change_list?id={{orderId}}",
 					"host": [
 						"{{base_url}}"
 					],
@@ -436,7 +481,7 @@
 					"query": [
 						{
 							"key": "id",
-							"value": "671ce8f7-ed40-4b96-be78-910f14444a2f"
+							"value": "{{orderId}}"
 						}
 					]
 				}
@@ -476,6 +521,11 @@
 		{
 			"key": "orderId",
 			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "timeoutGet",
+			"value": "1000",
 			"type": "string"
 		}
 	]

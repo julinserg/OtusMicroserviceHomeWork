@@ -13,14 +13,17 @@ services:
     image: order_service_saga_docker_image
     environment:
       USC_LOG_LEVEL: INFO
+      USC_AMQP_URI: "amqp://guest:guest@rabbit:5672/"
       USC_HTTP_HOST: 0.0.0.0
       USC_HTTP_PORT: 8090
       USC_PG_HOST: postgres
       USC_PG_USER: sergey
       USC_PG_PASSWORD: sergey
-      USC_PG_DB: shop
+      USC_PG_DB: shop_order
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbit:
         condition: service_healthy
     restart: on-failure
     ports:
@@ -37,35 +40,78 @@ services:
       dockerfile: ./build/DockerfilePay
     image: pay_service_saga_docker_image
     environment:
-      USC_LOG_LEVEL: INFO
-      USC_HTTP_HOST: 0.0.0.0
-      USC_HTTP_PORT: 9000
+      USC_LOG_LEVEL: INFO    
+      USC_AMQP_URI: "amqp://guest:guest@rabbit:5672/"
       USC_PG_HOST: postgres
       USC_PG_USER: sergey
       USC_PG_PASSWORD: sergey
-      USC_PG_DB: shop
+      USC_PG_DB: shop_pay
     depends_on:
       postgres:
         condition: service_healthy
+      rabbit:
+        condition: service_healthy
     restart: on-failure
-    ports:
-      - "9000:9000"
-    expose:
-      - 9000
+    networks:
+      - db
+      - rabbit
+
+  stock_service_saga:
+    build:
+      context: ../
+      dockerfile: ./build/DockerfileStock
+    image: stock_service_saga_docker_image
+    environment:
+      USC_LOG_LEVEL: INFO    
+      USC_AMQP_URI: "amqp://guest:guest@rabbit:5672/"
+      USC_PG_HOST: postgres
+      USC_PG_USER: sergey
+      USC_PG_PASSWORD: sergey
+      USC_PG_DB: shop_stock
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - db
+      - rabbit
+
+  delivery_service_saga:
+    build:
+      context: ../
+      dockerfile: ./build/DockerfileDelivery
+    image: delivery_service_saga_docker_image
+    environment:
+      USC_LOG_LEVEL: INFO    
+      USC_AMQP_URI: "amqp://guest:guest@rabbit:5672/"
+      USC_PG_HOST: postgres
+      USC_PG_USER: sergey
+      USC_PG_PASSWORD: sergey
+      USC_PG_DB: shop_delivery
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+    restart: on-failure
     networks:
       - db
       - rabbit
 
   postgres:
     image: postgres:11.1
+    volumes:
+        - ./docker-postgresql-multiple-databases:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: sergey
       POSTGRES_PASSWORD: sergey
-      POSTGRES_DB: shop
+      POSTGRES_MULTIPLE_DATABASES: shop_order, shop_pay, shop_stock, shop_delivery
     networks:
       - db
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d shop -U sergey " ]
+      test: [ "CMD-SHELL", "pg_isready -d shop_order -U sergey " ]
       interval: 5s
       timeout: 5s
       retries: 5

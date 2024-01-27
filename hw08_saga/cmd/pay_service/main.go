@@ -46,6 +46,8 @@ func main() {
 		dbName, _ := os.LookupEnv("USC_PG_DB")
 		config.PSQL.DSN = fmt.Sprintf("host=%s port=5432 user=%s password=%s dbname=%s sslmode=disable",
 			dbHost, dbUser, dbPassword, dbName)
+		value, _ = os.LookupEnv("USC_AMQP_URI")
+		config.AMQP.URI = value
 	}
 
 	f, err := os.OpenFile("pay_service_logfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
