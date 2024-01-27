@@ -2,7 +2,7 @@
 level = "INFO"
 
 [psql]
-dsn = "host=localhost port=5432 user=sergey password=sergey dbname=shop sslmode=disable"
+dsn = "host=localhost port=5432 user=sergey password=sergey dbname=shop_delivery sslmode=disable"
 
 [amqp]
 uri = "amqp://guest:guest@localhost:5672/"

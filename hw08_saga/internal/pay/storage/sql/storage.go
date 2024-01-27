@@ -31,7 +31,7 @@ func (s *Storage) Connect(ctx context.Context, dsn string) error {
 func (s *Storage) CreateSchema() error {
 	var err error
 	_, err = s.db.Query(`CREATE TABLE IF NOT EXISTS pay (id text primary key, id_order text, card_params text, 
-		amount int, operation text, time timestamptz, CONSTRAINT fk_order FOREIGN KEY(id_order) REFERENCES orders(id));`)
+		amount int, operation text, time timestamptz);`)
 	return err
 }
 
