@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service-deployment
+  labels:
+    app: order-service
+spec:
+  selector:
+    matchLabels:
+      app: order-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: julinserg/order_service_saga_docker_image:latest
+          ports:
+            - containerPort: 8090
+          env:
+            - name: USC_LOG_LEVEL
+              value: "INFO"        
+            - name: USC_AMQP_URI
+              value: "amqp://guest:guest@mq-shop-rabbitmq.default.svc.cluster.local:5672/"
+            - name: USC_HTTP_HOST
+              value: "0.0.0.0"
+            - name: USC_HTTP_PORT
+              value: "8090"
+            - name: USC_PG_HOST
+              value: "pg-order-service-postgresql"
+            - name: USC_PG_USER
+              value: "postgres"
+            - name: USC_PG_PASSWORD
+              value: "postgres"
+            - name: USC_PG_DB
+              value: "shop_order"

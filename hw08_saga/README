@@ -1,0 +1,2 @@
+sudo helm install mq-shop oci://registry-1.docker.io/bitnamicharts/rabbitmq --set auth.username='guest',auth.password='guest'
+sudo helm install pg-order-service oci://registry-1.docker.io/bitnamicharts/postgresql -f values.yaml --set auth.database=shop_order

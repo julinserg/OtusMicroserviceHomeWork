@@ -136,7 +136,7 @@ auth:
   password: "postgres"
   ## @param auth.database Name for a custom database to create
   ##
-  database: "users"
+  database: ""
   ## @param auth.replicationUsername Name of the replication user
   ##
   replicationUsername: repl_user
