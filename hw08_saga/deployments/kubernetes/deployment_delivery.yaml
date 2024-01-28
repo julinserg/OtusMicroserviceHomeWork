@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-service-deployment
+  labels:
+    app: delivery-service
+spec:
+  selector:
+    matchLabels:
+      app: delivery-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: delivery-service
+    spec:
+      containers:
+        - name: delivery-service
+          image: julinserg/delivery_service_saga_docker_image:latest      
+          env:
+            - name: USC_LOG_LEVEL
+              value: "INFO"        
+            - name: USC_AMQP_URI
+              value: "amqp://guest:guest@mq-shop-rabbitmq.default.svc.cluster.local:5672/"    
+            - name: USC_PG_HOST
+              value: "pg-delivery-service-postgresql"
+            - name: USC_PG_USER
+              value: "postgres"
+            - name: USC_PG_PASSWORD
+              value: "postgres"
+            - name: USC_PG_DB
+              value: "shop_delivery"
