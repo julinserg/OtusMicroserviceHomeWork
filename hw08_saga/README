@@ -1,5 +1,0 @@
-sudo helm install mq-shop oci://registry-1.docker.io/bitnamicharts/rabbitmq --set auth.username='guest',auth.password='guest'
-sudo helm install pg-order-service oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username='postgres',auth.password='postgres',auth.database='shop_order'
-sudo helm install pg-pay-service oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username='postgres',auth.password='postgres',auth.database='shop_pay'
-sudo helm install pg-stock-service oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username='postgres',auth.password='postgres',auth.database='shop_stock'
-sudo helm install pg-delivery-service oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username='postgres',auth.password='postgres',auth.database='shop_delivery'
