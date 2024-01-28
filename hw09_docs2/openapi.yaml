@@ -1,0 +1,302 @@
+openapi: 3.0.3
+info:
+  title: OtusShop - OpenAPI 3.0
+  description: |-
+    Описание API интернет-магазина на основе спецификации OpenAPI 3.0.
+  version: 1.0.0
+servers:
+  - url: https://127.0.0.1:8081/api/v1/orders
+tags:
+  - name: orders
+    description: 'Операции над заказами'
+  - name: billing
+    description: 'Операции оплаты'
+  - name: notification
+    description: 'Операции уведомлений'
+paths:
+  /list:
+    get:
+      tags:
+        - orders
+      summary: 'Получить список заказов'
+      description: ''
+      operationId: getOrdersList
+      parameters:
+        - name: userID
+          in: query
+          description: 'ID пользователя, который выполняет запрос.'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Операция выполнена'
+          content:
+            application/json:
+              schema:
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Order'
+        '400':
+          description: 'Некорректные параметры запроса'
+
+  /create:
+    post:
+      tags:
+        - orders
+      summary: 'Создать заказ'
+      description: ''
+      operationId: createOrder
+      parameters:
+        - name: userID
+          in: query
+          description: 'ID пользователя, который выполняет запрос.'
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/Order'
+      responses:
+        '200':
+          description: 'Операция выполнена'
+        '400':
+          description: 'Некорректные параметры запроса'
+          
+  /cancel:
+    post:
+      tags:
+        - orders
+      summary: 'Отменить заказ'
+      description: ''
+      operationId: cancleOrder
+      parameters:
+        - name: userID
+          in: query
+          description: 'ID пользователя, который выполняет запрос.'
+          required: true
+          schema:
+            type: string
+        - name: orderID
+          in: query
+          description: 'ID заказа.'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Операция выполнена'
+        '400':
+          description: 'Некорректные параметры запроса'
+  
+  /account:
+    get:
+      tags:
+        - billing
+      summary: 'Получить состояние денежного счета пользователя'
+      description: ''
+      operationId: getAccount
+      parameters:
+        - name: userID
+          in: query
+          description: 'ID пользователя'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Операция выполнена'
+          content:
+            application/json:
+              schema:
+                  oneOf:
+                    - $ref: '#/components/schemas/Account'
+        '400':
+          description: 'Некорректные параметры запроса'
+          
+  /pay:
+    post:
+      tags:
+        - billing
+      summary: 'Произвести списание/зачисление средств на денежный счет пользователя'
+      description: ''
+      operationId: createPay
+      parameters:
+        - name: userID
+          in: query
+          description: 'ID пользователя'
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/Pay'
+      responses:
+        '200':
+          description: 'Операция выполнена'
+        '400':
+          description: 'Некорректные параметры запроса'
+          
+  /notification:
+    get:
+      tags:
+        - notification
+      summary: 'Получить список уведомлений'
+      description: ''
+      operationId: getNotification
+      parameters:
+        - name: userID
+          in: query
+          description: 'ID пользователя'
+          required: true
+          schema:
+            type: string
+        - name: statusOrder
+          in: query
+          description: 'Статус заказа - PAYED/NOT_PAYED'
+          required: false
+          schema:
+            type: string
+        - name: period
+          in: query
+          description: 'Период - MINUTE/HOUR/DAY/WEEK/MONTH'
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Операция выполнена'
+          content:
+            application/json:
+              schema:
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/Notification'
+        '400':
+          description: 'Некорректные параметры запроса'
+  
+  /send:
+    post:
+      tags:
+        - notification
+      summary: 'Отправить уведомление'
+      description: ''
+      operationId: createNotification
+      parameters:
+        - name: userID
+          in: query
+          description: 'ID пользователя'
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/Notification'
+      responses:
+        '200':
+          description: 'Операция выполнена'
+        '400':
+          description: 'Некорректные параметры запроса'
+
+components:
+  schemas:
+    Notification:
+      type: object
+      properties:
+        id_notification:
+          type: string
+          description: 'ID уведомления'
+          format: uuid
+          example: "d4b6efe3-ecbe-4bd4-bb48-9493fee4f104"
+        time_notification:
+          type: string
+          format: datatime
+          description: 'Время создания уведомления'
+          example: "2009-06-01T13:45:30"
+        id_order:
+          type: string
+          description: 'ID заказа'
+          format: uuid
+          example: "579182b1-6537-48c9-b1b6-8105ec1ceb39"
+        status_order:
+          type: string
+          description: 'PAYED/NOT_PAYED'
+          example: "PAYED"
+            
+    Account:
+      type: object
+      properties:
+        userID:
+          type: string
+          description: 'ID пользователя'
+          format: uuid
+          example: "9bc10e8d-c40b-4d31-a06b-ee29f676c09d"
+        balance:
+          type: integer
+          example: 2000
+    
+    Pay:
+      type: object
+      properties:
+        id_order:
+          type: string
+          description: 'ID заказа'
+          format: uuid
+          example: "579182b1-6537-48c9-b1b6-8105ec1ceb39"
+        amount:
+          type: integer
+          example: 500
+        type_operation:
+          type: string
+          description: 'DEBIT/CREDIT'
+          example: "CREDIT"
+            
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'ID товара'
+          format: uuid
+          example: "579182b1-6537-48c9-b1b6-8105ec1ceb39"
+        name:
+          type: string
+          example: "Товар1"
+        price:
+          type: integer
+          example: 123
+        
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'ID заказа'
+          format: uuid
+          example: "579182b1-6537-48c9-b1b6-8105ec1ceb39"
+        products:
+          type: object
+          description: 'Список товаров в заказе'
+          properties:
+            option:
+              type: array
+              items:
+                  $ref: '#/components/schemas/Product'
+        shippingTo:
+          type: string
+          description: 'Адрес доставки'
+          example: "ул. Ленина, д. 12, кв. 51"
+        cardParams:
+          type: string
+          description: 'Номер карты'
+          example: "1234 5678 1234 5678; 345; Ivan Ivanov"
+        status:
+          type: string
+          description: 'CREATED/CANCELED/PAYED/RESERVED/DELIVERED'
+          example: "CREATED"
