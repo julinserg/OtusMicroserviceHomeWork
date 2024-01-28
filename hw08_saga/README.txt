@@ -1,11 +1,13 @@
 1. Манифесты - https://github.com/julinserg/otus-microservice-hw/tree/main/hw08_saga/deployments/kubernetes
-2. Перед применением манифестов необходимо установить рабит и постгрес следующими командами:
+2. Перед применением манифестов необходимо убедиться что в minikube включен nginx ingress controller, если нет то включить - minikube addons enable ingress
+2. Перед применением манифестов необходимо установить rabbitmq и postgresql следующими командами:
 sudo helm install mq-shop oci://registry-1.docker.io/bitnamicharts/rabbitmq --set auth.username='guest',auth.password='guest'
 sudo helm install pg-order-service oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username='postgres',auth.password='postgres',auth.database='shop_order'
 sudo helm install pg-pay-service oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username='postgres',auth.password='postgres',auth.database='shop_pay'
 sudo helm install pg-stock-service oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username='postgres',auth.password='postgres',auth.database='shop_stock'
 sudo helm install pg-delivery-service oci://registry-1.docker.io/bitnamicharts/postgresql --set auth.username='postgres',auth.password='postgres',auth.database='shop_delivery'
 3. Коллекция тестов постман - https://github.com/julinserg/otus-microservice-hw/blob/main/hw08_saga/test/postman/SagaTest.json
+4. Исходный код проекта - https://github.com/julinserg/otus-microservice-hw/tree/main/hw08_saga
 
 Описание реализации:
 
